@@ -16,6 +16,7 @@
     "@ai-sdk/anthropic": "^1.1.17",
     "@ai-sdk/react": "^1.1.23",
     "@modelcontextprotocol/sdk": "^1.8.0",
+    "@rocicorp/zero": "^0.20.2025052100",
     "@t3-oss/env-core": "^0.12.0",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-router": "^1.114.3",
@@ -57,5 +58,11 @@
     "vite": "^6.1.0",
     "vitest": "^3.0.5",
     "web-vitals": "^4.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@rocicorp/zero-sqlite3",
+      "protobufjs"
+    ]
   }
 }
