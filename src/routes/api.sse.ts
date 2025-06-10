@@ -2,7 +2,7 @@ import { createAPIFileRoute } from '@tanstack/react-start/api'
 import { getEvent } from 'vinxi/http'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
 
-import { transports, server } from '@/utils/demo.sse'
+import { transports, server } from '~/utils/demo.sse'
 
 export const APIRoute = createAPIFileRoute('/api/sse')({
   // @ts-ignore

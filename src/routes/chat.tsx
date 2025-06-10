@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useQuery, useZero } from '@rocicorp/zero/react'
-import type { Schema } from '@/db/schema'
+import type { Schema } from '~/db/schema'
 
 export const Route = createFileRoute('/chat')({
   component: Chat,
@@ -15,7 +15,10 @@ function Chat() {
 
   // Query all conversations
   const [conversations] = useQuery(
-    z.query.conversation.orderBy('created_at', 'desc').limit(10),
+    z.query.conversation
+      .related('messages')
+      .orderBy('created_at', 'desc')
+      .limit(10),
   )
 
   const handleSubmit = async (e: React.FormEvent) => {

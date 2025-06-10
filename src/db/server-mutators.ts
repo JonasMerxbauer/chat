@@ -15,15 +15,30 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
         tx: any,
         { id, prompt }: { id: string; prompt: string },
       ) => {
+        console.log('Creating conversation', id, prompt)
+
         // First, create the conversation record using client mutator
         await clientMutators.conversation.create(tx, { id, prompt })
 
-        console.log('Conversation created')
+        const messageId = crypto.randomUUID()
 
         // Set initial streaming status
-        await clientMutators.conversation.updateResponse(tx, {
-          id,
-          response: '',
+        await clientMutators.conversation.createMessage(tx, {
+          id: messageId,
+          conversationId: id,
+          content: prompt,
+          role: 'user',
+          status: 'complete',
+        })
+
+        const responseId = crypto.randomUUID()
+
+        // Set initial streaming status
+        await clientMutators.conversation.createMessage(tx, {
+          id: responseId,
+          conversationId: id,
+          content: '',
+          role: 'assistant',
           status: 'streaming',
         })
 
@@ -41,18 +56,18 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
               fullResponse += textPart
               console.log('Streaming text part', textPart)
 
-              await clientMutators.conversation.updateResponse(tx, {
-                id,
-                response: fullResponse,
+              await clientMutators.conversation.updateMessage(tx, {
+                id: responseId,
+                content: fullResponse,
                 status: 'streaming',
               })
             }
 
             // Final update when streaming is complete
             console.log('Streaming completed', fullResponse)
-            await clientMutators.conversation.updateResponse(tx, {
-              id,
-              response: fullResponse,
+            await clientMutators.conversation.updateMessage(tx, {
+              id: responseId,
+              content: fullResponse,
               status: 'complete',
             })
           } catch (error) {

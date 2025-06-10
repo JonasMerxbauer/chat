@@ -4,30 +4,60 @@ import type { Schema } from './schema'
 export function createMutators() {
   return {
     conversation: {
-      create: async (tx, { id, prompt }: { id: string; prompt: string }) => {
+      create: async (tx, { id }: { id: string; prompt: string }) => {
         const now = Date.now()
         await tx.mutate.conversation.insert({
           id,
-          prompt,
-          response: '',
-          status: 'pending',
+          title: 'New chat',
           created_at: now,
           updated_at: now,
         })
       },
 
-      updateResponse: async (
+      createMessage: async (
         tx,
         {
           id,
-          response,
+          conversationId,
+          content,
+          role,
           status,
-        }: { id: string; response: string; status: string },
+        }: {
+          id: string
+          conversationId: string
+          content: string
+          role: string
+          status: string
+        },
       ) => {
         const now = Date.now()
-        await tx.mutate.conversation.update({
+        await tx.mutate.message.insert({
           id,
-          response,
+          content,
+          role,
+          status,
+          created_at: now,
+          updated_at: now,
+          conversation_id: conversationId,
+        })
+      },
+
+      updateMessage: async (
+        tx,
+        {
+          id,
+          content,
+          status,
+        }: {
+          id: string
+          content: string
+          status: string
+        },
+      ) => {
+        const now = Date.now()
+        await tx.mutate.message.update({
+          id,
+          content,
           status,
           updated_at: now,
         })
@@ -38,7 +68,7 @@ export function createMutators() {
         { id, status }: { id: string; status: string },
       ) => {
         const now = Date.now()
-        await tx.mutate.conversation.update({
+        await tx.mutate.message.update({
           id,
           status,
           updated_at: now,

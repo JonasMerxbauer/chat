@@ -7,7 +7,7 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { ZeroProvider } from '@rocicorp/zero/react'
 import { Suspense } from 'react'
-import z from '@/db'
+import z from '~/db'
 
 import Header from '../components/Header'
 
@@ -38,11 +38,7 @@ export const Route = createRootRoute({
   component: () => (
     <ZeroProvider zero={z}>
       <RootDocument>
-        <Header />
-
-        <Suspense fallback={<div>Loading...</div>}>
-          <Outlet />
-        </Suspense>
+        <Outlet />
 
         <TanStackRouterDevtools />
       </RootDocument>

@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
 import { getWebRequest } from 'vinxi/http'
 
-import guitars from '@/data/example-guitars'
+import guitars from '~/data/example-guitars'
 
 export const server = new McpServer({
   name: 'guitar-server',

@@ -1,6 +1,6 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api'
-import { createMutators } from '@/db/server-mutators'
-import { schema } from '@/db/schema'
+import { createMutators } from '~/db/server-mutators'
+import { schema } from '~/db/schema'
 import {
   PushProcessor,
   ZQLDatabase,

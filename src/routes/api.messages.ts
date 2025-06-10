@@ -1,7 +1,7 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api'
 import { getEvent } from 'vinxi/http'
 
-import { transports } from '@/utils/demo.sse'
+import { transports } from '~/utils/demo.sse'
 
 export const APIRoute = createAPIFileRoute('/api/messages')({
   // @ts-ignore
