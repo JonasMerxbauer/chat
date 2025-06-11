@@ -3,15 +3,12 @@ import {
   HeadContent,
   Scripts,
   createRootRoute,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { ZeroProvider } from '@rocicorp/zero/react'
-import { Suspense } from 'react'
-import z from '~/db'
+} from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { ZeroProvider } from '@rocicorp/zero/react';
+import z from '~/db';
 
-import Header from '../components/Header'
-
-import appCss from '../styles.css?url'
+import appCss from '../styles.css?url';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -44,7 +41,8 @@ export const Route = createRootRoute({
       </RootDocument>
     </ZeroProvider>
   ),
-})
+  ssr: false,
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -57,5 +55,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }

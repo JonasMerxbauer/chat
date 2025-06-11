@@ -11,39 +11,36 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as ChatImport } from './routes/chat'
-import { Route as IndexImport } from './routes/index'
-import { Route as ExampleChatImport } from './routes/example.chat'
-import { Route as DemoStoreImport } from './routes/demo.store'
+import { Route as ChatxdImport } from './routes/chatxd'
+import { Route as ChatImport } from './routes/_chat'
+import { Route as ChatIndexImport } from './routes/_chat.index'
+import { Route as ChatChatIdImport } from './routes/_chat.$chatId'
 import { Route as ExampleGuitarsIndexImport } from './routes/example.guitars/index'
 import { Route as ExampleGuitarsGuitarIdImport } from './routes/example.guitars/$guitarId'
-import { Route as DemoStartServerFuncsImport } from './routes/demo.start.server-funcs'
-import { Route as DemoStartApiRequestImport } from './routes/demo.start.api-request'
 
 // Create/Update Routes
 
-const ChatRoute = ChatImport.update({
-  id: '/chat',
-  path: '/chat',
+const ChatxdRoute = ChatxdImport.update({
+  id: '/chatxd',
+  path: '/chatxd',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
+const ChatRoute = ChatImport.update({
+  id: '/_chat',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ChatIndexRoute = ChatIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => ChatRoute,
 } as any)
 
-const ExampleChatRoute = ExampleChatImport.update({
-  id: '/example/chat',
-  path: '/example/chat',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DemoStoreRoute = DemoStoreImport.update({
-  id: '/demo/store',
-  path: '/demo/store',
-  getParentRoute: () => rootRoute,
+const ChatChatIdRoute = ChatChatIdImport.update({
+  id: '/$chatId',
+  path: '/$chatId',
+  getParentRoute: () => ChatRoute,
 } as any)
 
 const ExampleGuitarsIndexRoute = ExampleGuitarsIndexImport.update({
@@ -58,63 +55,37 @@ const ExampleGuitarsGuitarIdRoute = ExampleGuitarsGuitarIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const DemoStartServerFuncsRoute = DemoStartServerFuncsImport.update({
-  id: '/demo/start/server-funcs',
-  path: '/demo/start/server-funcs',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DemoStartApiRequestRoute = DemoStartApiRequestImport.update({
-  id: '/demo/start/api-request',
-  path: '/demo/start/api-request',
-  getParentRoute: () => rootRoute,
-} as any)
-
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
+    '/_chat': {
+      id: '/_chat'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof ChatImport
       parentRoute: typeof rootRoute
     }
-    '/demo/store': {
-      id: '/demo/store'
-      path: '/demo/store'
-      fullPath: '/demo/store'
-      preLoaderRoute: typeof DemoStoreImport
+    '/chatxd': {
+      id: '/chatxd'
+      path: '/chatxd'
+      fullPath: '/chatxd'
+      preLoaderRoute: typeof ChatxdImport
       parentRoute: typeof rootRoute
     }
-    '/example/chat': {
-      id: '/example/chat'
-      path: '/example/chat'
-      fullPath: '/example/chat'
-      preLoaderRoute: typeof ExampleChatImport
-      parentRoute: typeof rootRoute
+    '/_chat/$chatId': {
+      id: '/_chat/$chatId'
+      path: '/$chatId'
+      fullPath: '/$chatId'
+      preLoaderRoute: typeof ChatChatIdImport
+      parentRoute: typeof ChatImport
     }
-    '/demo/start/api-request': {
-      id: '/demo/start/api-request'
-      path: '/demo/start/api-request'
-      fullPath: '/demo/start/api-request'
-      preLoaderRoute: typeof DemoStartApiRequestImport
-      parentRoute: typeof rootRoute
-    }
-    '/demo/start/server-funcs': {
-      id: '/demo/start/server-funcs'
-      path: '/demo/start/server-funcs'
-      fullPath: '/demo/start/server-funcs'
-      preLoaderRoute: typeof DemoStartServerFuncsImport
-      parentRoute: typeof rootRoute
+    '/_chat/': {
+      id: '/_chat/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof ChatIndexImport
+      parentRoute: typeof ChatImport
     }
     '/example/guitars/$guitarId': {
       id: '/example/guitars/$guitarId'
@@ -135,36 +106,41 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface ChatRouteChildren {
+  ChatChatIdRoute: typeof ChatChatIdRoute
+  ChatIndexRoute: typeof ChatIndexRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatChatIdRoute: ChatChatIdRoute,
+  ChatIndexRoute: ChatIndexRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/example/chat': typeof ExampleChatRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '': typeof ChatRouteWithChildren
+  '/chatxd': typeof ChatxdRoute
+  '/$chatId': typeof ChatChatIdRoute
+  '/': typeof ChatIndexRoute
   '/example/guitars/$guitarId': typeof ExampleGuitarsGuitarIdRoute
   '/example/guitars': typeof ExampleGuitarsIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/example/chat': typeof ExampleChatRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/chatxd': typeof ChatxdRoute
+  '/$chatId': typeof ChatChatIdRoute
+  '/': typeof ChatIndexRoute
   '/example/guitars/$guitarId': typeof ExampleGuitarsGuitarIdRoute
   '/example/guitars': typeof ExampleGuitarsIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/example/chat': typeof ExampleChatRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/_chat': typeof ChatRouteWithChildren
+  '/chatxd': typeof ChatxdRoute
+  '/_chat/$chatId': typeof ChatChatIdRoute
+  '/_chat/': typeof ChatIndexRoute
   '/example/guitars/$guitarId': typeof ExampleGuitarsGuitarIdRoute
   '/example/guitars/': typeof ExampleGuitarsIndexRoute
 }
@@ -172,55 +148,40 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | ''
+    | '/chatxd'
+    | '/$chatId'
     | '/'
-    | '/chat'
-    | '/demo/store'
-    | '/example/chat'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/example/guitars/$guitarId'
     | '/example/guitars'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/chatxd'
+    | '/$chatId'
     | '/'
-    | '/chat'
-    | '/demo/store'
-    | '/example/chat'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/example/guitars/$guitarId'
     | '/example/guitars'
   id:
     | '__root__'
-    | '/'
-    | '/chat'
-    | '/demo/store'
-    | '/example/chat'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
+    | '/_chat'
+    | '/chatxd'
+    | '/_chat/$chatId'
+    | '/_chat/'
     | '/example/guitars/$guitarId'
     | '/example/guitars/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ChatRoute: typeof ChatRoute
-  DemoStoreRoute: typeof DemoStoreRoute
-  ExampleChatRoute: typeof ExampleChatRoute
-  DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
-  DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
+  ChatRoute: typeof ChatRouteWithChildren
+  ChatxdRoute: typeof ChatxdRoute
   ExampleGuitarsGuitarIdRoute: typeof ExampleGuitarsGuitarIdRoute
   ExampleGuitarsIndexRoute: typeof ExampleGuitarsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ChatRoute: ChatRoute,
-  DemoStoreRoute: DemoStoreRoute,
-  ExampleChatRoute: ExampleChatRoute,
-  DemoStartApiRequestRoute: DemoStartApiRequestRoute,
-  DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
+  ChatRoute: ChatRouteWithChildren,
+  ChatxdRoute: ChatxdRoute,
   ExampleGuitarsGuitarIdRoute: ExampleGuitarsGuitarIdRoute,
   ExampleGuitarsIndexRoute: ExampleGuitarsIndexRoute,
 }
@@ -235,33 +196,29 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/chat",
-        "/demo/store",
-        "/example/chat",
-        "/demo/start/api-request",
-        "/demo/start/server-funcs",
+        "/_chat",
+        "/chatxd",
         "/example/guitars/$guitarId",
         "/example/guitars/"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/_chat": {
+      "filePath": "_chat.tsx",
+      "children": [
+        "/_chat/$chatId",
+        "/_chat/"
+      ]
     },
-    "/chat": {
-      "filePath": "chat.tsx"
+    "/chatxd": {
+      "filePath": "chatxd.tsx"
     },
-    "/demo/store": {
-      "filePath": "demo.store.tsx"
+    "/_chat/$chatId": {
+      "filePath": "_chat.$chatId.tsx",
+      "parent": "/_chat"
     },
-    "/example/chat": {
-      "filePath": "example.chat.tsx"
-    },
-    "/demo/start/api-request": {
-      "filePath": "demo.start.api-request.tsx"
-    },
-    "/demo/start/server-funcs": {
-      "filePath": "demo.start.server-funcs.tsx"
+    "/_chat/": {
+      "filePath": "_chat.index.tsx",
+      "parent": "/_chat"
     },
     "/example/guitars/$guitarId": {
       "filePath": "example.guitars/$guitarId.tsx"

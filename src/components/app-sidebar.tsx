@@ -8,29 +8,25 @@ import {
   ChevronsUpDown,
   Command,
   CreditCard,
-  Folder,
-  Forward,
   Frame,
   GalleryVerticalEnd,
   LogOut,
   Map,
   MoreHorizontal,
   PieChart,
-  Plus,
   Settings2,
   Sparkles,
   SquareTerminal,
-  Trash2,
-} from 'lucide-react'
+} from 'lucide-react';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '~/components/ui/collapsible'
+} from '~/components/ui/collapsible';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,20 +34,15 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
+} from '~/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -59,7 +50,8 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   useSidebar,
-} from '~/components/ui/sidebar'
+} from '~/components/ui/sidebar';
+import { cn } from '~/lib/utils';
 
 // This is sample data.
 const data = {
@@ -189,20 +181,17 @@ const data = {
       icon: Map,
     },
   ],
-}
+};
 
 export function AppSidebar({
   conversations,
+  selectedConversation,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
-  conversations: any[]
+  conversations: any[];
+  selectedConversation: string;
 }) {
-  const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(data.teams[0])
-
-  if (!activeTeam) {
-    return null
-  }
+  const { isMobile } = useSidebar();
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -252,7 +241,13 @@ export function AppSidebar({
             {conversations.map((conversation) => (
               <SidebarMenuItem key={conversation.id}>
                 <SidebarMenuButton asChild>
-                  <a href={`/conversations/${conversation.id}`}>
+                  <a
+                    href={`/${conversation.id}`}
+                    className={cn(
+                      selectedConversation === conversation.id &&
+                        'bg-main text-main-foreground',
+                    )}
+                  >
                     <span>{conversation.title}</span>
                   </a>
                 </SidebarMenuButton>
@@ -273,7 +268,7 @@ export function AppSidebar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
-                  className="group-data-[state=collapsed]:hover:outline-0 group-data-[state=collapsed]:hover:bg-transparent overflow-visible"
+                  className="overflow-visible group-data-[state=collapsed]:hover:bg-transparent group-data-[state=collapsed]:hover:outline-0"
                   size="lg"
                 >
                   <Avatar className="h-8 w-8">
@@ -284,7 +279,7 @@ export function AppSidebar({
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-heading">
+                    <span className="font-heading truncate">
                       {data.user.name}
                     </span>
                     <span className="truncate text-xs">{data.user.email}</span>
@@ -298,7 +293,7 @@ export function AppSidebar({
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="p-0 font-base">
+                <DropdownMenuLabel className="font-base p-0">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
@@ -308,7 +303,7 @@ export function AppSidebar({
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-heading">
+                      <span className="font-heading truncate">
                         {data.user.name}
                       </span>
                       <span className="truncate text-xs">
@@ -351,5 +346,5 @@ export function AppSidebar({
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

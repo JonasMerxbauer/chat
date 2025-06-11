@@ -1,7 +1,7 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 @plugin "tailwindcss-animate";
-@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -14,7 +14,7 @@
   --border: oklch(0% 0 0);
   --ring: oklch(0% 0 0);
   --overlay: oklch(0% 0 0 / 0.8);
-  --shadow: 2px 2px 0px 0px var(--border);
+  --shadow: 0px 2px 0px 0px var(--border);
   --chart-1: #5294ff;
   --chart-2: #ff4d50;
   --chart-3: #facc00;
@@ -31,7 +31,7 @@
   --main: oklch(67.47% 0.1726 259.49);
   --border: oklch(0% 0 0);
   --ring: oklch(100% 0 0);
-  --shadow: 2px 2px 0px 0px var(--border);
+  --shadow: 0px 2px 0px 0px var(--border);
   --chart-1: #5294ff;
   --chart-2: #ff6669;
   --chart-3: #e0b700;
@@ -55,9 +55,9 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --spacing-boxShadowX: 2px;
+  --spacing-boxShadowX: 0px;
   --spacing-boxShadowY: 2px;
-  --spacing-reverseBoxShadowX: -2px;
+  --spacing-reverseBoxShadowX: -0px;
   --spacing-reverseBoxShadowY: -2px;
   --radius-base: 15px;
   --shadow-shadow: var(--shadow);

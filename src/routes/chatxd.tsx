@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useZero } from '@rocicorp/zero/react'
 import type { Schema } from '~/db/schema'
 
-export const Route = createFileRoute('/chat')({
+export const Route = createFileRoute('/chatxd')({
   component: Chat,
   ssr: false,
 })
