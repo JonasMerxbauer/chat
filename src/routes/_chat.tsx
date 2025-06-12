@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_chat')({
 
 function RouteComponent() {
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
-
+  Route;
   const [conversations] = useQuery(
     z.query.conversation
       .related('messages')

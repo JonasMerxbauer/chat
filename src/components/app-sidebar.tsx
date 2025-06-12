@@ -1,10 +1,10 @@
+import { useNavigate } from '@tanstack/react-router';
 import {
   AudioWaveform,
   BadgeCheck,
   Bell,
   BookOpen,
   Bot,
-  ChevronRight,
   ChevronsUpDown,
   Command,
   CreditCard,
@@ -12,7 +12,6 @@ import {
   GalleryVerticalEnd,
   LogOut,
   Map,
-  MoreHorizontal,
   PieChart,
   Settings2,
   Sparkles,
@@ -22,11 +21,6 @@ import {
 import * as React from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '~/components/ui/collapsible';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,13 +39,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarRail,
   useSidebar,
 } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
+import { Button } from './ui/button';
 
 // This is sample data.
 const data = {
@@ -191,49 +183,15 @@ export function AppSidebar({
   conversations: any[];
   selectedConversation: string;
 }) {
+  const navigate = useNavigate();
+
   const { isMobile } = useSidebar();
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
-          <SidebarMenu>
-            {data.navMain.map((item) => (
-              <Collapsible
-                key={item.title}
-                asChild
-                defaultOpen={item.isActive}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      className="data-[state=open]:bg-main data-[state=open]:outline-border data-[state=open]:text-main-foreground"
-                      tooltip={item.title}
-                    >
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            ))}
-          </SidebarMenu>
+          <Button onClick={() => navigate({ to: '/' })}>New chat</Button>
         </SidebarGroup>
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Conversations</SidebarGroupLabel>
@@ -253,12 +211,6 @@ export function AppSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <MoreHorizontal />
-                <span>More</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

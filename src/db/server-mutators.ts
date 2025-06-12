@@ -12,14 +12,17 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
     conversation: {
       ...clientMutators.conversation,
 
-      create: async (
+      createConversation: async (
         tx: any,
         { id, prompt }: { id: string; prompt: string },
       ) => {
         console.log('Creating conversation', id, prompt);
 
         // First, create the conversation record using client mutator
-        await clientMutators.conversation.create(tx, { id, prompt });
+        await clientMutators.conversation.createConversation(tx, {
+          id,
+          prompt,
+        });
 
         const messageId = crypto.randomUUID();
 

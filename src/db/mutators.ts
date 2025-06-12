@@ -4,7 +4,10 @@ import type { Schema } from './schema';
 export function createMutators() {
   return {
     conversation: {
-      create: async (tx, { id }: { id: string; prompt: string }) => {
+      createConversation: async (
+        tx,
+        { id }: { id: string; prompt: string },
+      ) => {
         const now = Date.now();
         await tx.mutate.conversation.insert({
           id,
