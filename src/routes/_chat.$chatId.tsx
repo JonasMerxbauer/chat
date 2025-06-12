@@ -10,6 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
 
 export const Route = createFileRoute('/_chat/$chatId')({
   component: Page,
@@ -29,8 +34,6 @@ export default function Page() {
       prompt: message,
     });
   };
-
-  console.log(conversations[0]);
 
   if (!conversations[0]) return null;
 
@@ -99,6 +102,7 @@ const ChatInput = ({
 
           <Button
             onClick={() => {
+              console.log('Sending message', inputRef.current?.value);
               onSendMessage(inputRef.current?.value ?? '');
               inputRef.current!.value = '';
             }}
@@ -119,9 +123,23 @@ const Message = ({ message }: { message: any }) => {
     <div
       className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
-      <a className="rounded-base border-border bg-main text-main-foreground shadow-shadow border-2 p-4 transition-all">
-        <p className="w500:text-sm">{content}</p>
-      </a>
+      <div className="rounded-base border-border bg-main text-main-foreground shadow-shadow max-w-[70%] border-2 p-4 transition-all">
+        {role === 'assistant' ? (
+          <ReactMarkdown
+            className="prose max-w-none"
+            rehypePlugins={[
+              rehypeRaw,
+              rehypeSanitize,
+              rehypeHighlight,
+              remarkGfm,
+            ]}
+          >
+            {content}
+          </ReactMarkdown>
+        ) : (
+          <div className="w500:text-sm">{content}</div>
+        )}
+      </div>
     </div>
   );
 };

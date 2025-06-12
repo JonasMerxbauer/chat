@@ -121,7 +121,7 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
               fullResponse += textPart;
               console.log('Streaming text part', textPart);
 
-              await clientMutators.conversation.updateMessage(tx, {
+              clientMutators.conversation.updateMessage(tx, {
                 id: responseId,
                 content: fullResponse,
                 status: 'streaming',

@@ -15,8 +15,6 @@ import { Route as ChatxdImport } from './routes/chatxd'
 import { Route as ChatImport } from './routes/_chat'
 import { Route as ChatIndexImport } from './routes/_chat.index'
 import { Route as ChatChatIdImport } from './routes/_chat.$chatId'
-import { Route as ExampleGuitarsIndexImport } from './routes/example.guitars/index'
-import { Route as ExampleGuitarsGuitarIdImport } from './routes/example.guitars/$guitarId'
 
 // Create/Update Routes
 
@@ -41,18 +39,6 @@ const ChatChatIdRoute = ChatChatIdImport.update({
   id: '/$chatId',
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
-} as any)
-
-const ExampleGuitarsIndexRoute = ExampleGuitarsIndexImport.update({
-  id: '/example/guitars/',
-  path: '/example/guitars/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ExampleGuitarsGuitarIdRoute = ExampleGuitarsGuitarIdImport.update({
-  id: '/example/guitars/$guitarId',
-  path: '/example/guitars/$guitarId',
-  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -87,20 +73,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatIndexImport
       parentRoute: typeof ChatImport
     }
-    '/example/guitars/$guitarId': {
-      id: '/example/guitars/$guitarId'
-      path: '/example/guitars/$guitarId'
-      fullPath: '/example/guitars/$guitarId'
-      preLoaderRoute: typeof ExampleGuitarsGuitarIdImport
-      parentRoute: typeof rootRoute
-    }
-    '/example/guitars/': {
-      id: '/example/guitars/'
-      path: '/example/guitars'
-      fullPath: '/example/guitars'
-      preLoaderRoute: typeof ExampleGuitarsIndexImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -123,16 +95,12 @@ export interface FileRoutesByFullPath {
   '/chatxd': typeof ChatxdRoute
   '/$chatId': typeof ChatChatIdRoute
   '/': typeof ChatIndexRoute
-  '/example/guitars/$guitarId': typeof ExampleGuitarsGuitarIdRoute
-  '/example/guitars': typeof ExampleGuitarsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/chatxd': typeof ChatxdRoute
   '/$chatId': typeof ChatChatIdRoute
   '/': typeof ChatIndexRoute
-  '/example/guitars/$guitarId': typeof ExampleGuitarsGuitarIdRoute
-  '/example/guitars': typeof ExampleGuitarsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -141,49 +109,25 @@ export interface FileRoutesById {
   '/chatxd': typeof ChatxdRoute
   '/_chat/$chatId': typeof ChatChatIdRoute
   '/_chat/': typeof ChatIndexRoute
-  '/example/guitars/$guitarId': typeof ExampleGuitarsGuitarIdRoute
-  '/example/guitars/': typeof ExampleGuitarsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | ''
-    | '/chatxd'
-    | '/$chatId'
-    | '/'
-    | '/example/guitars/$guitarId'
-    | '/example/guitars'
+  fullPaths: '' | '/chatxd' | '/$chatId' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/chatxd'
-    | '/$chatId'
-    | '/'
-    | '/example/guitars/$guitarId'
-    | '/example/guitars'
-  id:
-    | '__root__'
-    | '/_chat'
-    | '/chatxd'
-    | '/_chat/$chatId'
-    | '/_chat/'
-    | '/example/guitars/$guitarId'
-    | '/example/guitars/'
+  to: '/chatxd' | '/$chatId' | '/'
+  id: '__root__' | '/_chat' | '/chatxd' | '/_chat/$chatId' | '/_chat/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   ChatRoute: typeof ChatRouteWithChildren
   ChatxdRoute: typeof ChatxdRoute
-  ExampleGuitarsGuitarIdRoute: typeof ExampleGuitarsGuitarIdRoute
-  ExampleGuitarsIndexRoute: typeof ExampleGuitarsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRouteWithChildren,
   ChatxdRoute: ChatxdRoute,
-  ExampleGuitarsGuitarIdRoute: ExampleGuitarsGuitarIdRoute,
-  ExampleGuitarsIndexRoute: ExampleGuitarsIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -197,9 +141,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_chat",
-        "/chatxd",
-        "/example/guitars/$guitarId",
-        "/example/guitars/"
+        "/chatxd"
       ]
     },
     "/_chat": {
@@ -219,12 +161,6 @@ export const routeTree = rootRoute
     "/_chat/": {
       "filePath": "_chat.index.tsx",
       "parent": "/_chat"
-    },
-    "/example/guitars/$guitarId": {
-      "filePath": "example.guitars/$guitarId.tsx"
-    },
-    "/example/guitars/": {
-      "filePath": "example.guitars/index.tsx"
     }
   }
 }
