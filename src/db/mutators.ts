@@ -6,12 +6,12 @@ export function createMutators() {
     conversation: {
       createConversation: async (
         tx,
-        { id }: { id: string; prompt: string },
+        { id, prompt }: { id: string; prompt: string },
       ) => {
         const now = Date.now();
         await tx.mutate.conversation.insert({
           id,
-          title: 'New chat',
+          title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
           created_at: now,
           updated_at: now,
         });

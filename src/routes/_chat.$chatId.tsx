@@ -14,14 +14,6 @@ export default function Page() {
     z.query.conversation.related('messages').where('id', '=', chatId),
   );
 
-  const handleSendMessage = async (message: string) => {
-    console.log('Sending message', message);
-    await (z as any).mutate.conversation.createMessage({
-      id: conversations[0].id,
-      prompt: message,
-    });
-  };
-
   if (!conversations[0]) return null;
 
   return (
@@ -37,10 +29,7 @@ export default function Page() {
           ))}
       </div>
       <div className="absolute bottom-5 w-full">
-        <ChatInput
-          placeholder="Type your message here xd..."
-          onSendMessage={handleSendMessage}
-        />
+        <ChatInput placeholder="Type your message here xd..." />
       </div>
     </div>
   );

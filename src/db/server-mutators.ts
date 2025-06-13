@@ -1,11 +1,8 @@
 import type { CustomMutatorDefs } from '@rocicorp/zero';
 import type { Schema } from './schema';
 import { createMutators as createClientMutators } from './mutators';
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
-import { google } from '@ai-sdk/google';
 
-export function createMutators(asyncTasks: Array<() => Promise<void>>) {
+export function createMutators() {
   const clientMutators = createClientMutators();
   return {
     ...clientMutators,
@@ -26,7 +23,7 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
 
         const messageId = crypto.randomUUID();
 
-        // Set initial streaming status
+        // Create user message
         await clientMutators.conversation.createMessage(tx, {
           id: messageId,
           conversationId: id,
@@ -37,49 +34,40 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
 
         const responseId = crypto.randomUUID();
 
-        // Set initial streaming status
+        // Create placeholder for AI response
         await clientMutators.conversation.createMessage(tx, {
           id: responseId,
           conversationId: id,
           content: '',
           role: 'assistant',
-          status: 'streaming',
+          status: 'pending',
         });
 
-        // Add the AI streaming task to asyncTasks to run outside the transaction
-        asyncTasks.push(async () => {
-          try {
-            const { textStream } = streamText({
-              model: openai('gpt-4o'),
-              prompt: prompt,
-            });
+        // Trigger streaming via separate endpoint (no async task)
+        setTimeout(() => {
+          const baseUrl =
+            process.env.NODE_ENV === 'production'
+              ? process.env.VERCEL_URL
+                ? `https://${process.env.VERCEL_URL}`
+                : 'http://localhost:3000'
+              : 'http://localhost:3000';
 
-            let fullResponse = '';
+          fetch(`${baseUrl}/api/stream-ai`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              responseId,
+              prompt,
+              model: 'gpt-4o',
+            }),
+          }).catch((error) => {
+            console.error('Failed to trigger streaming:', error);
+          });
+        }, 0);
 
-            for await (const textPart of textStream) {
-              fullResponse += textPart;
-              console.log('Streaming text part', textPart);
-
-              await clientMutators.conversation.updateMessage(tx, {
-                id: responseId,
-                content: fullResponse,
-                status: 'streaming',
-              });
-            }
-
-            // Final update when streaming is complete
-            console.log('Streaming completed', fullResponse);
-            await clientMutators.conversation.updateMessage(tx, {
-              id: responseId,
-              content: fullResponse,
-              status: 'complete',
-            });
-          } catch (error) {
-            console.error('AI streaming error:', error);
-          }
-        });
-
-        console.log('AI streaming task queued');
+        console.log('AI streaming triggered for response:', responseId);
       },
 
       createMessage: async (
@@ -90,7 +78,7 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
 
         const messageId = crypto.randomUUID();
 
-        // Set initial streaming status
+        // Create user message
         await clientMutators.conversation.createMessage(tx, {
           id: messageId,
           conversationId: id,
@@ -101,47 +89,40 @@ export function createMutators(asyncTasks: Array<() => Promise<void>>) {
 
         const responseId = crypto.randomUUID();
 
-        // Set initial streaming status
+        // Create placeholder for AI response
         await clientMutators.conversation.createMessage(tx, {
           id: responseId,
           conversationId: id,
           content: '',
           role: 'assistant',
-          status: 'streaming',
+          status: 'pending',
         });
 
-        // Add the AI streaming task to asyncTasks to run outside the transaction
-        asyncTasks.push(async () => {
-          try {
-            const { textStream } = streamText({
-              model: google('gemini-2.0-flash-lite'),
-              prompt: prompt,
-            });
+        // Trigger streaming via separate endpoint (no async task)
+        setTimeout(() => {
+          const baseUrl =
+            process.env.NODE_ENV === 'production'
+              ? process.env.VERCEL_URL
+                ? `https://${process.env.VERCEL_URL}`
+                : 'http://localhost:3000'
+              : 'http://localhost:3000';
 
-            let fullResponse = '';
+          fetch(`${baseUrl}/api/stream-ai`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              responseId,
+              prompt,
+              model: 'gpt-4o',
+            }),
+          }).catch((error) => {
+            console.error('Failed to trigger streaming:', error);
+          });
+        }, 0);
 
-            for await (const textPart of textStream) {
-              fullResponse += textPart;
-              console.log('Streaming text part', textPart);
-
-              clientMutators.conversation.updateMessage(tx, {
-                id: responseId,
-                content: fullResponse,
-                status: 'streaming',
-              });
-            }
-
-            // Final update when streaming is complete
-            console.log('Streaming completed', fullResponse);
-            await clientMutators.conversation.updateMessage(tx, {
-              id: responseId,
-              content: fullResponse,
-              status: 'complete',
-            });
-          } catch (error) {
-            console.error('AI streaming error:', error);
-          }
-        });
+        console.log('AI streaming triggered for response:', responseId);
       },
     },
   } as const satisfies CustomMutatorDefs<Schema>;

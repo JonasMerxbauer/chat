@@ -84,7 +84,6 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
 
           <Button
             onClick={() => {
-              console.log('Sending message', inputRef.current?.value);
               handleSendMessage(inputRef.current?.value ?? '');
               inputRef.current!.value = '';
             }}
