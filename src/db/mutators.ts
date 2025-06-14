@@ -4,14 +4,11 @@ import type { Schema } from './schema';
 export function createMutators() {
   return {
     conversation: {
-      createConversation: async (
-        tx,
-        { id, prompt }: { id: string; prompt: string },
-      ) => {
+      createConversation: async (tx, { id }: { id: string }) => {
         const now = Date.now();
         await tx.mutate.conversation.insert({
           id,
-          title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
+          title: 'New chat',
           created_at: now,
           updated_at: now,
         });
@@ -74,6 +71,18 @@ export function createMutators() {
         await tx.mutate.message.update({
           id,
           status,
+          updated_at: now,
+        });
+      },
+
+      updateConversationTitle: async (
+        tx,
+        { id, title }: { id: string; title: string },
+      ) => {
+        const now = Date.now();
+        await tx.mutate.conversation.update({
+          id,
+          title,
           updated_at: now,
         });
       },

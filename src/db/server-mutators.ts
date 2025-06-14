@@ -18,7 +18,6 @@ export function createMutators() {
         // First, create the conversation record using client mutator
         await clientMutators.conversation.createConversation(tx, {
           id,
-          prompt,
         });
 
         const messageId = crypto.randomUUID();
@@ -42,6 +41,29 @@ export function createMutators() {
           role: 'assistant',
           status: 'pending',
         });
+
+        // Trigger AI title generation (independent from response)
+        setTimeout(() => {
+          const baseUrl =
+            process.env.NODE_ENV === 'production'
+              ? process.env.VERCEL_URL
+                ? `https://${process.env.VERCEL_URL}`
+                : 'http://localhost:3000'
+              : 'http://localhost:3000';
+
+          fetch(`${baseUrl}/api/generate-title`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              conversationId: id,
+              prompt,
+            }),
+          }).catch((error) => {
+            console.error('Failed to trigger title generation:', error);
+          });
+        }, 0);
 
         // Trigger streaming via separate endpoint (no async task)
         setTimeout(() => {
@@ -68,6 +90,7 @@ export function createMutators() {
         }, 0);
 
         console.log('AI streaming triggered for response:', responseId);
+        console.log('AI title generation triggered for conversation:', id);
       },
 
       createMessage: async (
