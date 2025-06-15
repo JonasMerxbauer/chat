@@ -1,7 +1,8 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api';
-import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { Pool } from 'pg';
+import { google } from '@ai-sdk/google';
+import { DEFAULT_MODEL } from '~/constants';
 
 // Create a shared database pool for title updates
 const titlePool = new Pool({
@@ -27,7 +28,7 @@ export const APIRoute = createAPIFileRoute('/api/generate-title')({
 
       // Generate title using AI
       const { text: title } = await generateText({
-        model: openai('gpt-4o'),
+        model: google(DEFAULT_MODEL.id),
         prompt: `Generate a concise, informative title (max 60 characters) for a conversation that starts with this message: "${prompt}". The title should capture the main topic or question. Only return the title, nothing else.`,
         maxTokens: 20,
       });

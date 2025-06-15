@@ -14,10 +14,21 @@ import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import z from '~/db';
+import { DEFAULT_MODEL, getAllModels } from '~/constants';
 
 export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
   const navigate = useNavigate();
+  const [selectedModel, setSelectedModel] = useState<{
+    id: string;
+    provider: string;
+    name: string;
+  }>({
+    id: DEFAULT_MODEL.id,
+    provider: DEFAULT_MODEL.provider,
+    name: DEFAULT_MODEL.name,
+  });
+
   const conversationId = params?.chatId ?? '';
 
   const handleSendMessage = async (message: string) => {
@@ -27,6 +38,7 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
       (z as any).mutate.conversation.createMessage({
         id: conversationId,
         prompt: message,
+        model: selectedModel,
       });
     } else {
       const id = crypto.randomUUID();
@@ -35,6 +47,7 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
         id,
         title: 'New chat',
         prompt: message,
+        model: selectedModel,
       });
 
       navigate({
@@ -60,27 +73,21 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
           />
         </div>
         <div className="flex justify-between">
-          {(() => {
-            const models = ['GPT 4o', 'GPT 4o mini'];
-            const [selectedModel, setSelectedModel] = useState(models[0]);
-            return (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button>{selectedModel}</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {models.map((model) => (
-                    <DropdownMenuItem
-                      key={model}
-                      onClick={() => setSelectedModel(model)}
-                    >
-                      {model}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          })()}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>{selectedModel.name}</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {getAllModels().map((model) => (
+                <DropdownMenuItem
+                  key={model.id}
+                  onClick={() => setSelectedModel(model)}
+                >
+                  {model.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             onClick={() => {

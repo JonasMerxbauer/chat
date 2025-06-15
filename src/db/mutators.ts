@@ -42,6 +42,14 @@ export function createMutators() {
         });
       },
 
+      deleteMessage: async (tx, { id }: { id: string }) => {
+        await tx.mutate.message.delete({ id });
+      },
+
+      deleteConversation: async (tx, { id }: { id: string }) => {
+        await tx.mutate.conversation.delete({ id });
+      },
+
       updateMessage: async (
         tx,
         {

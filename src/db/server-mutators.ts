@@ -11,7 +11,7 @@ export function createMutators() {
 
       createConversation: async (
         tx: any,
-        { id, prompt }: { id: string; prompt: string },
+        { id, prompt, model }: { id: string; prompt: string; model: any },
       ) => {
         console.log('Creating conversation', id, prompt);
 
@@ -59,6 +59,7 @@ export function createMutators() {
             body: JSON.stringify({
               conversationId: id,
               prompt,
+              model,
             }),
           }).catch((error) => {
             console.error('Failed to trigger title generation:', error);
@@ -95,7 +96,7 @@ export function createMutators() {
 
       createMessage: async (
         tx: any,
-        { id, prompt }: { id: string; prompt: string },
+        { id, prompt, model }: { id: string; prompt: string; model: any },
       ) => {
         console.log('Sending prompt', id, prompt);
 
@@ -138,7 +139,7 @@ export function createMutators() {
             body: JSON.stringify({
               responseId,
               prompt,
-              model: 'gpt-4o',
+              model,
             }),
           }).catch((error) => {
             console.error('Failed to trigger streaming:', error);

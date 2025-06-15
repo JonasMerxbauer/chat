@@ -1,8 +1,10 @@
 import { createAPIFileRoute } from '@tanstack/react-start/api';
 import { openai } from '@ai-sdk/openai';
 import { google } from '@ai-sdk/google';
+import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 import { Pool } from 'pg';
+import { DEFAULT_MODEL } from '~/constants';
 
 // Create a shared database pool for streaming updates
 const streamingPool = new Pool({
@@ -15,11 +17,17 @@ const streamingPool = new Pool({
 export const APIRoute = createAPIFileRoute('/api/stream-ai')({
   POST: async ({ request }) => {
     try {
-      const { responseId, prompt, model = 'gpt-4o' } = await request.json();
+      const {
+        responseId,
+        prompt,
+        model = DEFAULT_MODEL,
+      } = await request.json();
 
-      if (!responseId || !prompt) {
+      console.log('model', model);
+
+      if (!responseId || !prompt || !model) {
         return new Response(
-          JSON.stringify({ error: 'Missing responseId or prompt' }),
+          JSON.stringify({ error: 'Missing responseId or prompt or model' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } },
         );
       }
@@ -40,9 +48,17 @@ export const APIRoute = createAPIFileRoute('/api/stream-ai')({
 
         try {
           const aiModel =
-            model === 'gpt-4o'
-              ? openai('gpt-4o')
-              : google('gemini-2.0-flash-lite');
+            model.provider === 'OPENAI'
+              ? openai(model.id)
+              : model.provider === 'GOOGLE'
+                ? google(model.id)
+                : model.provider === 'ANTHROPIC'
+                  ? anthropic(model.id)
+                  : null;
+
+          if (!aiModel) {
+            throw new Error('Invalid model');
+          }
 
           const { textStream } = streamText({
             model: aiModel,
