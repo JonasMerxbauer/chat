@@ -1,6 +1,10 @@
 import type { CustomMutatorDefs } from '@rocicorp/zero';
 import type { Schema } from './schema';
 import { createMutators as createClientMutators } from './mutators';
+import {
+  generateConversationTitle,
+  streamAIResponse,
+} from '~/utils/ai-operations';
 
 export function createMutators() {
   const clientMutators = createClientMutators();
@@ -42,53 +46,23 @@ export function createMutators() {
           status: 'pending',
         });
 
-        // Trigger AI title generation (independent from response)
-        setTimeout(() => {
-          const baseUrl =
-            process.env.NODE_ENV === 'production'
-              ? process.env.VERCEL_URL
-                ? `https://${process.env.VERCEL_URL}`
-                : 'http://localhost:3000'
-              : 'http://localhost:3000';
+        // Trigger AI title generation (fire and forget)
+        (async () => {
+          try {
+            await generateConversationTitle(id, prompt, model);
+          } catch (error) {
+            console.error('Failed to generate title:', error);
+          }
+        })();
 
-          fetch(`${baseUrl}/api/generate-title`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              conversationId: id,
-              prompt,
-              model,
-            }),
-          }).catch((error) => {
-            console.error('Failed to trigger title generation:', error);
-          });
-        }, 0);
-
-        // Trigger streaming via separate endpoint (no async task)
-        setTimeout(() => {
-          const baseUrl =
-            process.env.NODE_ENV === 'production'
-              ? process.env.VERCEL_URL
-                ? `https://${process.env.VERCEL_URL}`
-                : 'http://localhost:3000'
-              : 'http://localhost:3000';
-
-          fetch(`${baseUrl}/api/stream-ai`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              responseId,
-              prompt,
-              model: 'gpt-4o',
-            }),
-          }).catch((error) => {
+        // Trigger AI streaming (fire and forget)
+        (async () => {
+          try {
+            await streamAIResponse(responseId, prompt, model);
+          } catch (error) {
             console.error('Failed to trigger streaming:', error);
-          });
-        }, 0);
+          }
+        })();
 
         console.log('AI streaming triggered for response:', responseId);
         console.log('AI title generation triggered for conversation:', id);
@@ -122,29 +96,14 @@ export function createMutators() {
           status: 'pending',
         });
 
-        // Trigger streaming via separate endpoint (no async task)
-        setTimeout(() => {
-          const baseUrl =
-            process.env.NODE_ENV === 'production'
-              ? process.env.VERCEL_URL
-                ? `https://${process.env.VERCEL_URL}`
-                : 'http://localhost:3000'
-              : 'http://localhost:3000';
-
-          fetch(`${baseUrl}/api/stream-ai`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              responseId,
-              prompt,
-              model,
-            }),
-          }).catch((error) => {
+        // Trigger AI streaming (fire and forget)
+        (async () => {
+          try {
+            await streamAIResponse(responseId, prompt, model);
+          } catch (error) {
             console.error('Failed to trigger streaming:', error);
-          });
-        }, 0);
+          }
+        })();
 
         console.log('AI streaming triggered for response:', responseId);
       },
