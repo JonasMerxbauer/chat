@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import z from '~/db';
 import { useQuery } from '@rocicorp/zero/react';
 import { ChatInput, Message } from '~/components/chat-input';
+import { useZero } from '~/hooks/use-zero';
 
 export const Route = createFileRoute('/_chat/$chatId')({
   component: Page,
@@ -10,6 +10,7 @@ export const Route = createFileRoute('/_chat/$chatId')({
 
 export default function Page() {
   const { chatId } = Route.useParams();
+  const z = useZero();
   const [conversations] = useQuery(
     z.query.conversation.related('messages').where('id', '=', chatId),
   );

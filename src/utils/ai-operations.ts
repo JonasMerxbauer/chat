@@ -22,7 +22,7 @@ const streamingPool = new Pool({
 
 export async function generateConversationTitle(
   conversationId: string,
-  prompt: string,
+  content: string,
   model = DEFAULT_MODEL,
 ) {
   try {
@@ -31,7 +31,7 @@ export async function generateConversationTitle(
     // Generate title using AI
     const { text: title } = await generateText({
       model: google(model.id),
-      prompt: `Generate a concise, informative title (max 60 characters) for a conversation that starts with this message: "${prompt}". The title should capture the main topic or question. Only return the title, nothing else.`,
+      prompt: `Generate a concise, informative title (max 60 characters) for a conversation that starts with this message: "${content}". The title should capture the main topic or question. Only return the title, nothing else.`,
       maxTokens: 20,
     });
 
@@ -56,7 +56,7 @@ export async function generateConversationTitle(
 
 export async function streamAIResponse(
   responseId: string,
-  prompt: string,
+  content: string,
   model = DEFAULT_MODEL,
 ) {
   try {
@@ -90,7 +90,7 @@ export async function streamAIResponse(
 
         const { textStream } = streamText({
           model: aiModel,
-          prompt,
+          prompt: content,
         });
 
         let fullResponse = '';

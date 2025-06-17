@@ -1,4 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router';
+import { signOut } from '~/auth';
+import { clearZeroData } from '~/lib/zero-auth';
 import {
   AudioWaveform,
   BadgeCheck,
@@ -45,136 +47,6 @@ import {
 import { cn } from '~/lib/utils';
 import { Button } from './ui/button';
 
-// This is sample data.
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  teams: [
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-    {
-      name: 'Evil Corp.',
-      logo: Command,
-      plan: 'Free',
-    },
-  ],
-  navMain: [
-    {
-      title: 'Playground',
-      url: '#',
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: 'History',
-          url: '#',
-        },
-        {
-          title: 'Starred',
-          url: '#',
-        },
-        {
-          title: 'Settings',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Models',
-      url: '#',
-      icon: Bot,
-      items: [
-        {
-          title: 'Genesis',
-          url: '#',
-        },
-        {
-          title: 'Explorer',
-          url: '#',
-        },
-        {
-          title: 'Quantum',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Documentation',
-      url: '#',
-      icon: BookOpen,
-      items: [
-        {
-          title: 'Introduction',
-          url: '#',
-        },
-        {
-          title: 'Get Started',
-          url: '#',
-        },
-        {
-          title: 'Tutorials',
-          url: '#',
-        },
-        {
-          title: 'Changelog',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Settings',
-      url: '#',
-      icon: Settings2,
-      items: [
-        {
-          title: 'General',
-          url: '#',
-        },
-        {
-          title: 'Team',
-          url: '#',
-        },
-        {
-          title: 'Billing',
-          url: '#',
-        },
-        {
-          title: 'Limits',
-          url: '#',
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChart,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: Map,
-    },
-  ],
-};
-
 export function AppSidebar({
   conversations,
   selectedConversation,
@@ -188,6 +60,21 @@ export function AppSidebar({
   const navigate = useNavigate();
 
   const { isMobile } = useSidebar();
+
+  const handleSignOut = async () => {
+    try {
+      // Clear Zero data first
+      await clearZeroData();
+
+      // Then sign out
+      await signOut();
+
+      // Navigate to home
+      navigate({ to: '/' });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -241,20 +128,11 @@ export function AppSidebar({
                 >
                   <DropdownMenuLabel className="font-base p-0">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src="https://github.com/shadcn.png?size=40"
-                          alt="CN"
-                        />
-                        <AvatarFallback>CN</AvatarFallback>
-                      </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="font-heading truncate">
-                          {data.user.name}
+                          {user.name}
                         </span>
-                        <span className="truncate text-xs">
-                          {data.user.email}
-                        </span>
+                        <span className="truncate text-xs">{user.email}</span>
                       </div>
                     </div>
                   </DropdownMenuLabel>
@@ -281,7 +159,7 @@ export function AppSidebar({
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut />
                     Log out
                   </DropdownMenuItem>

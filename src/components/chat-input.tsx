@@ -13,12 +13,14 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import z from '~/db';
 import { DEFAULT_MODEL, getAllModels } from '~/constants';
+import { useSession } from '~/lib/zero-auth';
+import { useZero } from '~/hooks/use-zero';
 
 export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
   const navigate = useNavigate();
+  const z = useZero();
   const [selectedModel, setSelectedModel] = useState<{
     id: string;
     provider: string;
@@ -31,29 +33,46 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
 
   const conversationId = params?.chatId ?? '';
 
+  const { data: session } = useSession();
+
+  const userId = session?.user?.id;
+
   const handleSendMessage = async (message: string) => {
     console.log('Sending message', message);
 
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
     if (conversationId) {
-      (z as any).mutate.conversation.createMessage({
-        id: conversationId,
-        prompt: message,
+      const messageId = crypto.randomUUID();
+
+      z.mutate.conversation.createMessage({
+        id: messageId,
+        conversationId: conversationId,
+        content: message,
         model: selectedModel,
+        role: 'user',
+        status: 'sending',
+        userId,
       });
     } else {
-      const id = crypto.randomUUID();
+      const conversationId = crypto.randomUUID();
+      const messageId = crypto.randomUUID();
 
-      (z as any).mutate.conversation.createConversation({
-        id,
+      z.mutate.conversation.createConversation({
+        id: conversationId,
         title: 'New chat',
-        prompt: message,
+        messageId,
+        content: message,
         model: selectedModel,
+        userId,
       });
 
       navigate({
         to: '/$chatId',
         params: {
-          chatId: id,
+          chatId: conversationId,
         },
       });
     }

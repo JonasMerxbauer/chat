@@ -15,24 +15,43 @@ export function createMutators() {
 
       createConversation: async (
         tx: any,
-        { id, prompt, model }: { id: string; prompt: string; model: any },
+        {
+          id,
+          title,
+          messageId,
+          content,
+          model,
+          userId,
+        }: {
+          id: string;
+          title: string;
+          messageId: string;
+          content: string;
+          model: any;
+          userId: string;
+        },
       ) => {
-        console.log('Creating conversation', id, prompt);
+        console.log('Creating conversation', id, content);
 
         // First, create the conversation record using client mutator
         await clientMutators.conversation.createConversation(tx, {
           id,
+          messageId,
+          content,
+          title,
+          userId,
+          model,
         });
-
-        const messageId = crypto.randomUUID();
 
         // Create user message
         await clientMutators.conversation.createMessage(tx, {
           id: messageId,
           conversationId: id,
-          content: prompt,
+          content,
+          model,
           role: 'user',
           status: 'complete',
+          userId,
         });
 
         const responseId = crypto.randomUUID();
@@ -42,14 +61,16 @@ export function createMutators() {
           id: responseId,
           conversationId: id,
           content: '',
+          model,
           role: 'assistant',
           status: 'pending',
+          userId,
         });
 
         // Trigger AI title generation (fire and forget)
         (async () => {
           try {
-            await generateConversationTitle(id, prompt, model);
+            await generateConversationTitle(id, content);
           } catch (error) {
             console.error('Failed to generate title:', error);
           }
@@ -58,7 +79,7 @@ export function createMutators() {
         // Trigger AI streaming (fire and forget)
         (async () => {
           try {
-            await streamAIResponse(responseId, prompt, model);
+            await streamAIResponse(responseId, content, model);
           } catch (error) {
             console.error('Failed to trigger streaming:', error);
           }
@@ -70,19 +91,35 @@ export function createMutators() {
 
       createMessage: async (
         tx: any,
-        { id, prompt, model }: { id: string; prompt: string; model: any },
+        {
+          id,
+          conversationId,
+          content,
+          role,
+          status,
+          model,
+          userId,
+        }: {
+          id: string;
+          conversationId: string;
+          content: string;
+          role: string;
+          status: string;
+          model: any;
+          userId: string;
+        },
       ) => {
-        console.log('Sending prompt', id, prompt);
-
-        const messageId = crypto.randomUUID();
+        console.log('Sending prompt', id, content);
 
         // Create user message
         await clientMutators.conversation.createMessage(tx, {
-          id: messageId,
-          conversationId: id,
-          content: prompt,
+          id: id,
+          conversationId: conversationId,
+          content: content,
+          model,
           role: 'user',
           status: 'complete',
+          userId,
         });
 
         const responseId = crypto.randomUUID();
@@ -90,16 +127,18 @@ export function createMutators() {
         // Create placeholder for AI response
         await clientMutators.conversation.createMessage(tx, {
           id: responseId,
-          conversationId: id,
+          conversationId: conversationId,
           content: '',
+          model,
           role: 'assistant',
           status: 'pending',
+          userId,
         });
 
         // Trigger AI streaming (fire and forget)
         (async () => {
           try {
-            await streamAIResponse(responseId, prompt, model);
+            await streamAIResponse(responseId, content, model);
           } catch (error) {
             console.error('Failed to trigger streaming:', error);
           }

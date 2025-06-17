@@ -1,17 +1,30 @@
 import { useQuery } from '@rocicorp/zero/react';
-import { createFileRoute, Outlet, useParams } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useParams,
+} from '@tanstack/react-router';
 import { AppSidebar } from '~/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
-import z from '~/db';
 import { useSession } from '~/auth';
+import { useZero } from '~/hooks/use-zero';
 
 export const Route = createFileRoute('/_chat')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { data: session, isPending } = useSession();
+  const navigate = useNavigate();
+
+  if (!session?.user && !isPending) {
+    navigate({ to: '/auth' });
+    return null;
+  }
+
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
-  const { data: session } = useSession();
+  const z = useZero();
   const [conversations] = useQuery(
     z.query.conversation
       .related('messages')

@@ -1,6 +1,2 @@
-import { createAuthClient } from 'better-auth/react';
-
-// Only create the client-side auth client
-export const { signIn, signUp, useSession } = createAuthClient({
-  baseURL: 'http://localhost:3000',
-});
+// Re-export from the zero-auth module
+export { signIn, signUp, signOut, useSession } from '~/lib/zero-auth';

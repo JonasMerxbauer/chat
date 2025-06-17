@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signIn, signUp, useSession } from '~/auth';
+import { refreshAuth } from '~/lib/zero-auth';
 import { Button } from '~/components/ui/button';
 import {
   Card,
@@ -78,6 +79,8 @@ function AuthPage() {
       if (result.error) {
         setError(result.error.message || 'Failed to sign in');
       } else {
+        // Refresh auth state to get JWT for Zero
+        await refreshAuth();
         navigate({ to: '/' });
       }
     } catch (err) {
@@ -109,6 +112,8 @@ function AuthPage() {
       if (result.error) {
         setError(result.error.message || 'Failed to create account');
       } else {
+        // Refresh auth state to get JWT for Zero
+        await refreshAuth();
         navigate({ to: '/' });
       }
     } catch (err) {
@@ -123,9 +128,14 @@ function AuthPage() {
     setError(null);
 
     try {
-      await signIn.social({
+      const result = await signIn.social({
         provider: 'github',
       });
+
+      if (!result.error) {
+        // Refresh auth state to get JWT for Zero
+        await refreshAuth();
+      }
     } catch (err) {
       setError('Failed to sign in with GitHub');
       setIsLoading(false);

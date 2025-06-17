@@ -4,7 +4,7 @@ import {
   string,
   number,
   relationships,
-} from '@rocicorp/zero'
+} from '@rocicorp/zero';
 
 const message = table('message')
   .columns({
@@ -15,8 +15,9 @@ const message = table('message')
     status: string(),
     created_at: number(),
     updated_at: number(),
+    user_id: string(),
   })
-  .primaryKey('id')
+  .primaryKey('id');
 
 const conversation = table('conversation')
   .columns({
@@ -24,8 +25,9 @@ const conversation = table('conversation')
     title: string(),
     created_at: number(),
     updated_at: number(),
+    user_id: string(),
   })
-  .primaryKey('id')
+  .primaryKey('id');
 
 const messageRelationships = relationships(message, ({ one }) => ({
   conversation: one({
@@ -33,7 +35,7 @@ const messageRelationships = relationships(message, ({ one }) => ({
     destField: ['id'],
     destSchema: conversation,
   }),
-}))
+}));
 
 const conversationRelationships = relationships(conversation, ({ many }) => ({
   messages: many({
@@ -41,18 +43,67 @@ const conversationRelationships = relationships(conversation, ({ many }) => ({
     destSchema: message,
     destField: ['conversation_id'],
   }),
-}))
+}));
 
 export const schema = createSchema({
   tables: [message, conversation],
   relationships: [messageRelationships, conversationRelationships],
-})
+});
 
-export type Schema = typeof schema
+export type Schema = typeof schema;
 
-import { ANYONE_CAN_DO_ANYTHING, definePermissions } from '@rocicorp/zero'
+import {
+  definePermissions,
+  ANYONE_CAN,
+  type ExpressionBuilder,
+  type PermissionsConfig,
+} from '@rocicorp/zero';
 
-export const permissions = definePermissions<unknown, Schema>(schema, () => ({
-  message: ANYONE_CAN_DO_ANYTHING,
-  conversation: ANYONE_CAN_DO_ANYTHING,
-}))
+// Type for JWT claims from better-auth
+type AuthData = {
+  sub: string; // User ID from JWT
+  email?: string;
+  role?: string;
+};
+
+export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  // Allow users to only see their own conversations/messages
+  const isOwner = (
+    authData: AuthData,
+    { cmp }: ExpressionBuilder<Schema, 'conversation' | 'message'>,
+  ) => cmp('user_id', authData.sub);
+
+  // Allow anonymous users to access their local data
+  const isOwnerOrAnon = (
+    authData: AuthData,
+    { cmp }: ExpressionBuilder<Schema, 'conversation' | 'message'>,
+  ) => {
+    if (authData.sub === 'anon') {
+      return cmp('user_id', 'anon');
+    }
+    return cmp('user_id', authData.sub);
+  };
+
+  return {
+    conversation: {
+      row: {
+        select: [isOwnerOrAnon],
+        insert: ANYONE_CAN,
+        update: {
+          preMutation: [isOwner],
+        },
+        delete: [isOwner],
+      },
+    },
+    message: {
+      row: {
+        select: [isOwnerOrAnon],
+        insert: ANYONE_CAN,
+        update: {
+          preMutation: [isOwner],
+        },
+        delete: [isOwner],
+      },
+    },
+  } satisfies PermissionsConfig<AuthData, Schema>;
+});

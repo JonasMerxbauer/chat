@@ -4,13 +4,39 @@ import type { Schema } from './schema';
 export function createMutators() {
   return {
     conversation: {
-      createConversation: async (tx, { id }: { id: string }) => {
+      createConversation: async (
+        tx,
+        {
+          id,
+          messageId,
+          content,
+          model,
+          title,
+          userId,
+        }: {
+          id: string;
+          messageId: string;
+          content: string;
+          model: any;
+          title: string;
+          userId: string;
+        },
+      ) => {
         const now = Date.now();
         await tx.mutate.conversation.insert({
           id,
-          title: 'New chat',
+          title: title,
           created_at: now,
           updated_at: now,
+          user_id: userId,
+        });
+
+        await tx.mutate.message.update({
+          id: messageId,
+          conversation_id: id,
+          content: content,
+          role: 'user',
+          status: 'complete',
         });
       },
 
@@ -20,14 +46,18 @@ export function createMutators() {
           id,
           conversationId,
           content,
+          model,
           role,
           status,
+          userId,
         }: {
           id: string;
           conversationId: string;
           content: string;
+          model: any;
           role: string;
           status: string;
+          userId: string;
         },
       ) => {
         const now = Date.now();
@@ -39,6 +69,7 @@ export function createMutators() {
           created_at: now,
           updated_at: now,
           conversation_id: conversationId,
+          user_id: userId,
         });
       },
 

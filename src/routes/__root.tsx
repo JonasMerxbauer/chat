@@ -5,10 +5,11 @@ import {
   createRootRoute,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { ZeroProvider } from '@rocicorp/zero/react';
-import z from '~/db';
 
 import appCss from '../styles.css?url';
+import { zeroRef } from '~/lib/zero-auth';
+import { useCallback, useSyncExternalStore, useEffect, useState } from 'react';
+import { ZeroProvider } from '@rocicorp/zero/react';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -33,16 +34,48 @@ export const Route = createRootRoute({
   }),
 
   component: () => (
-    <ZeroProvider zero={z}>
+    <ZeroAuthProvider>
       <RootDocument>
         <Outlet />
 
-        {/* <TanStackRouterDevtools /> */}
+        <TanStackRouterDevtools />
       </RootDocument>
-    </ZeroProvider>
+    </ZeroAuthProvider>
   ),
   ssr: false,
 });
+
+const ZeroAuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const z = useSyncExternalStore(
+    zeroRef.onChange,
+    useCallback(() => zeroRef.value, []),
+    // Server-side snapshot should return undefined
+    () => undefined,
+  );
+
+  // Don't render anything on server or before client hydration
+  if (!isClient) {
+    return <RootDocument>{null}</RootDocument>;
+  }
+
+  // Show loading while Zero is initializing
+  if (!z) {
+    return (
+      <RootDocument>
+        <div>Initializing...</div>
+      </RootDocument>
+    );
+  }
+
+  return <ZeroProvider zero={z}>{children}</ZeroProvider>;
+};
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
