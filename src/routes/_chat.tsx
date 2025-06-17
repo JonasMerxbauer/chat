@@ -3,6 +3,7 @@ import { createFileRoute, Outlet, useParams } from '@tanstack/react-router';
 import { AppSidebar } from '~/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import z from '~/db';
+import { useSession } from '~/auth';
 
 export const Route = createFileRoute('/_chat')({
   component: RouteComponent,
@@ -10,7 +11,7 @@ export const Route = createFileRoute('/_chat')({
 
 function RouteComponent() {
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
-  Route;
+  const { data: session } = useSession();
   const [conversations] = useQuery(
     z.query.conversation
       .related('messages')
@@ -23,6 +24,7 @@ function RouteComponent() {
       <AppSidebar
         conversations={conversations}
         selectedConversation={params?.chatId ?? ''}
+        user={session?.user}
       />
       <SidebarInset>
         <Outlet />
