@@ -147,7 +147,6 @@ if (isClient) {
     mark('creating new zero');
     const authData = auth?.decoded;
     const z = new Zero({
-      logLevel: 'info',
       server: import.meta.env.VITE_ZERO_SERVER || 'http://localhost:4848',
       userID: authData?.sub ?? 'anon',
       mutators: createMutators(),

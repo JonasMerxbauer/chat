@@ -5,11 +5,19 @@ import {
   createRootRoute,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { lazy, Suspense } from 'react';
 
 import appCss from '../styles.css?url';
 import { zeroRef } from '~/lib/zero-auth';
 import { useCallback, useSyncExternalStore, useEffect, useState } from 'react';
 import { ZeroProvider } from '@rocicorp/zero/react';
+
+// Lazy load dev tools to reduce initial bundle size and overhead
+const TanStackRouterDevtoolsLazy = lazy(() =>
+  import('@tanstack/react-router-devtools').then((module) => ({
+    default: module.TanStackRouterDevtools,
+  })),
+);
 
 export const Route = createRootRoute({
   head: () => ({
@@ -38,7 +46,12 @@ export const Route = createRootRoute({
       <RootDocument>
         <Outlet />
 
-        <TanStackRouterDevtools />
+        {/* Only load dev tools when explicitly needed */}
+        {import.meta.env.DEV && (
+          <Suspense fallback={null}>
+            <TanStackRouterDevtoolsLazy />
+          </Suspense>
+        )}
       </RootDocument>
     </ZeroAuthProvider>
   ),

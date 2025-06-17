@@ -2,27 +2,15 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { signOut } from '~/auth';
 import { clearZeroData } from '~/lib/zero-auth';
 import {
-  AudioWaveform,
   BadgeCheck,
   Bell,
-  BookOpen,
-  Bot,
   ChevronsUpDown,
-  Command,
   CreditCard,
-  Frame,
-  GalleryVerticalEnd,
   LogOut,
-  Map,
-  PieChart,
-  Settings2,
   Sparkles,
-  SquareTerminal,
 } from 'lucide-react';
 
 import * as React from 'react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +46,6 @@ export function AppSidebar({
   user: any;
 }) {
   const navigate = useNavigate();
-
   const { isMobile } = useSidebar();
 
   const handleSignOut = async () => {
@@ -88,15 +75,16 @@ export function AppSidebar({
             {conversations.map((conversation) => (
               <SidebarMenuItem key={conversation.id}>
                 <SidebarMenuButton asChild>
-                  <a
-                    href={`/${conversation.id}`}
+                  <Link
+                    to="/$chatId"
+                    params={{ chatId: conversation.id }}
                     className={cn(
                       selectedConversation === conversation.id &&
                         'bg-main text-main-foreground',
                     )}
                   >
                     <span>{conversation.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
@@ -166,9 +154,9 @@ export function AppSidebar({
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button className="w-full">
-                <Link to="/auth">Sign in</Link>
-              </Button>
+              <Link to="/auth">
+                <Button className="w-full">Sign in</Button>
+              </Link>
             )}
           </SidebarMenuItem>
         </SidebarMenu>

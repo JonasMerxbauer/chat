@@ -1,9 +1,9 @@
-import { createRouter as createTanstackRouter } from '@tanstack/react-router'
+import { createRouter as createTanstackRouter } from '@tanstack/react-router';
 
 // Import the generated route tree
-import { routeTree } from './routeTree.gen'
+import { routeTree } from './routeTree.gen';
 
-import './styles.css'
+import './styles.css';
 
 // Create a new router instance
 export const createRouter = () => {
@@ -11,14 +11,16 @@ export const createRouter = () => {
     routeTree,
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
-  })
+    // Optimize for performance in dev mode
+    defaultPreload: 'intent', // Preload on hover/focus instead of immediately
+  });
 
-  return router
-}
+  return router;
+};
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {
-    router: ReturnType<typeof createRouter>
+    router: ReturnType<typeof createRouter>;
   }
 }

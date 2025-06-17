@@ -8,7 +8,8 @@ import {
 import { AppSidebar } from '~/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { useSession } from '~/auth';
-import { useZero } from '~/hooks/use-zero';
+import { useZero, useBackgroundChatPreload } from '~/hooks/use-zero';
+import { useMemo } from 'react';
 
 export const Route = createFileRoute('/_chat')({
   component: RouteComponent,
@@ -25,12 +26,32 @@ function RouteComponent() {
 
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
   const z = useZero();
+
+  // Existing query for sidebar
   const [conversations] = useQuery(
     z.query.conversation
       .related('messages')
       .orderBy('created_at', 'desc')
       .limit(10),
   );
+
+  // Memoize preloading to avoid unnecessary work
+  useMemo(() => {
+    // Add preloading for better performance
+    // Preload more conversations with their messages for instant transitions
+    z.query.conversation
+      .related('messages')
+      .orderBy('created_at', 'desc')
+      .limit(50) // Preload more conversations
+      .preload();
+  }, [z]);
+
+  // Keep recent conversations in background for instant access
+  const recentChatIds = useMemo(
+    () => conversations.slice(0, 5).map((c) => c.id),
+    [conversations],
+  );
+  useBackgroundChatPreload(recentChatIds);
 
   return (
     <SidebarProvider>
