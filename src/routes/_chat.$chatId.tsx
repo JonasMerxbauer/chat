@@ -69,11 +69,10 @@ export default function Page() {
   }, [messages.length]);
 
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
+    const container = messagesContainerRef.current;
+    if (container) {
+      // Scroll to absolute bottom of the container instantly
+      container.scrollTop = container.scrollHeight;
     }
   };
 
