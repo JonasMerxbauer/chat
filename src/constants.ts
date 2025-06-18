@@ -1,6 +1,14 @@
 export const MODELS = {
-  GPT_4O: { id: 'gpt-4o', name: 'GPT-4o', provider: 'OPENAI' },
-  GPT_4O_MINI: { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OPENAI' },
+  GPT_4O: {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    provider: 'OPENAI',
+  },
+  GPT_4O_MINI: {
+    id: 'gpt-4o-mini',
+    name: 'GPT-4o Mini',
+    provider: 'OPENAI',
+  },
   CLAUDE_3_5_SONNET: {
     id: 'claude-3-5-sonnet',
     name: 'Claude 3.5 Sonnet',
@@ -30,3 +38,18 @@ export const getAllModels = () => {
 export const findModelById = (modelId: string) => {
   return getAllModels().find((model) => model.id === modelId);
 };
+
+// Message status types
+export const MESSAGE_STATUSES = {
+  SENDING: 'sending',
+  PENDING: 'pending',
+  STREAMING: 'streaming',
+  COMPLETE: 'complete',
+  ERROR: 'error',
+} as const;
+
+// Message types
+export const MESSAGE_TYPES = {
+  TEXT: 'text',
+  STRUCTURED: 'structured',
+} as const;

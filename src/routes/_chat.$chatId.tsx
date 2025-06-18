@@ -36,14 +36,13 @@ export default function Page() {
     }
   }, [messages.length, messages[messages.length - 1]?.content]);
 
-  // Track scroll position to show/hide scroll to bottom button
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100; // 100px threshold
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
       setShowScrollToBottom(!isAtBottom);
     };
 
@@ -83,7 +82,9 @@ export default function Page() {
 
   return (
     <div className="relative flex h-screen flex-col">
-      <h1 className="absolute top-4 left-4 text-3xl">{conversation.title}</h1>
+      <div className="bg-secondary-background/50 absolute top-0 left-0 z-50 flex w-full items-center p-4 backdrop-blur-sm">
+        <h1 className="text-3xl">{conversation.title}</h1>
+      </div>
       <div
         ref={messagesContainerRef}
         data-messages-container
@@ -104,7 +105,6 @@ export default function Page() {
             </div>
           ))}
       </div>
-      {/* Scroll to bottom button */}
       {showScrollToBottom && (
         <div className="absolute right-8 bottom-48 z-10 lg:bottom-32">
           <Button

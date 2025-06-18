@@ -11,8 +11,8 @@ const message = table('message')
     id: string(),
     conversation_id: string(),
     content: string(),
-    role: string(),
-    status: string(),
+    role: string(), // 'user' | 'assistant'
+    status: string(), // 'sending' | 'pending' | 'streaming' | 'complete' | 'error'
     created_at: number(),
     updated_at: number(),
     user_id: string(),

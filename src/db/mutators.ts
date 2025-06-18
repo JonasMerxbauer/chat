@@ -30,14 +30,6 @@ export function createMutators() {
           updated_at: now,
           user_id: userId,
         });
-
-        await tx.mutate.message.update({
-          id: messageId,
-          conversation_id: id,
-          content: content,
-          role: 'user',
-          status: 'complete',
-        });
       },
 
       createMessage: async (
@@ -61,6 +53,7 @@ export function createMutators() {
         },
       ) => {
         const now = Date.now();
+
         await tx.mutate.message.insert({
           id,
           content,
@@ -78,6 +71,16 @@ export function createMutators() {
       },
 
       deleteConversation: async (tx, { id }: { id: string }) => {
+        const messages = await tx.query.message.where(
+          'conversation_id',
+          '=',
+          id,
+        );
+
+        for (const message of messages) {
+          await tx.mutate.message.delete({ id: message.id });
+        }
+
         await tx.mutate.conversation.delete({ id });
       },
 
@@ -98,30 +101,6 @@ export function createMutators() {
           id,
           content,
           status,
-          updated_at: now,
-        });
-      },
-
-      updateStatus: async (
-        tx,
-        { id, status }: { id: string; status: string },
-      ) => {
-        const now = Date.now();
-        await tx.mutate.message.update({
-          id,
-          status,
-          updated_at: now,
-        });
-      },
-
-      updateConversationTitle: async (
-        tx,
-        { id, title }: { id: string; title: string },
-      ) => {
-        const now = Date.now();
-        await tx.mutate.conversation.update({
-          id,
-          title,
           updated_at: now,
         });
       },

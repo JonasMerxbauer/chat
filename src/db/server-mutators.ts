@@ -5,6 +5,7 @@ import {
   generateConversationTitle,
   streamAIResponse,
 } from '~/utils/ai-operations';
+import { MESSAGE_STATUSES, MESSAGE_TYPES } from '~/constants';
 
 export function createMutators() {
   const clientMutators = createClientMutators();
@@ -31,7 +32,13 @@ export function createMutators() {
           userId: string;
         },
       ) => {
-        console.log('Creating conversation', id, content);
+        console.log(
+          'Creating conversation',
+          id,
+          content,
+          'with model:',
+          model.name,
+        );
 
         // First, create the conversation record using client mutator
         await clientMutators.conversation.createConversation(tx, {
@@ -50,7 +57,7 @@ export function createMutators() {
           content,
           model,
           role: 'user',
-          status: 'complete',
+          status: MESSAGE_STATUSES.COMPLETE,
           userId,
         });
 
@@ -63,14 +70,14 @@ export function createMutators() {
           content: '',
           model,
           role: 'assistant',
-          status: 'pending',
+          status: MESSAGE_STATUSES.PENDING,
           userId,
         });
 
         // Trigger AI title generation (fire and forget)
         (async () => {
           try {
-            await generateConversationTitle(id, content);
+            await generateConversationTitle(id, content, model);
           } catch (error) {
             console.error('Failed to generate title:', error);
           }
@@ -109,7 +116,7 @@ export function createMutators() {
           userId: string;
         },
       ) => {
-        console.log('Sending prompt', id, content);
+        console.log('Sending prompt', id, content, 'with model:', model.name);
 
         // Create user message
         await clientMutators.conversation.createMessage(tx, {
@@ -118,7 +125,7 @@ export function createMutators() {
           content: content,
           model,
           role: 'user',
-          status: 'complete',
+          status: MESSAGE_STATUSES.COMPLETE,
           userId,
         });
 
@@ -131,7 +138,7 @@ export function createMutators() {
           content: '',
           model,
           role: 'assistant',
-          status: 'pending',
+          status: MESSAGE_STATUSES.PENDING,
           userId,
         });
 

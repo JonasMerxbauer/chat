@@ -8,6 +8,7 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  X,
 } from 'lucide-react';
 
 import * as React from 'react';
@@ -34,6 +35,7 @@ import {
 } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
 import { Button } from './ui/button';
+import { useZero } from '~/hooks/use-zero';
 
 export function AppSidebar({
   conversations,
@@ -47,6 +49,7 @@ export function AppSidebar({
 }) {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
+  const z = useZero();
 
   const handleSignOut = async () => {
     try {
@@ -63,6 +66,24 @@ export function AppSidebar({
     }
   };
 
+  const handleDeleteConversation = async (
+    e: React.MouseEvent,
+    conversationId: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      z.mutate.conversation.deleteConversation({ id: conversationId });
+
+      if (selectedConversation === conversationId) {
+        navigate({ to: '/' });
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarContent>
@@ -74,18 +95,32 @@ export function AppSidebar({
           <SidebarMenu>
             {conversations.map((conversation) => (
               <SidebarMenuItem key={conversation.id}>
-                <SidebarMenuButton asChild>
-                  <Link
-                    to="/$chatId"
-                    params={{ chatId: conversation.id }}
-                    className={cn(
-                      selectedConversation === conversation.id &&
-                        'bg-main text-main-foreground',
-                    )}
+                <div className="conversation-item relative flex w-full">
+                  <SidebarMenuButton asChild className="flex-1 pr-8">
+                    <Link
+                      to="/$chatId"
+                      params={{ chatId: conversation.id }}
+                      className={cn(
+                        'flex-1 truncate',
+                        selectedConversation === conversation.id &&
+                          'bg-main text-main-foreground',
+                      )}
+                    >
+                      <span className="truncate">{conversation.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+
+                  <Button
+                    variant="neutral"
+                    size="sm"
+                    className="absolute top-1/2 right-1 z-10 h-6 w-6 -translate-y-1/2 p-0 opacity-0 transition-opacity hover:!translate-x-0 hover:!translate-y-[-50%] hover:!shadow-none [.conversation-item:hover_&]:opacity-100"
+                    onClick={(e) =>
+                      handleDeleteConversation(e, conversation.id)
+                    }
                   >
-                    <span>{conversation.title}</span>
-                  </Link>
-                </SidebarMenuButton>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>

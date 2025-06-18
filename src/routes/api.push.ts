@@ -7,14 +7,10 @@ import {
   PostgresJSConnection,
 } from '@rocicorp/zero/pg';
 import postgres from 'postgres';
-import { streamText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { env } from '~/env';
 
 const processor = new PushProcessor(
-  new ZQLDatabase(
-    new PostgresJSConnection(postgres(process.env.ZERO_UPSTREAM_DB! as string)),
-    schema,
-  ),
+  new ZQLDatabase(new PostgresJSConnection(postgres(env.DATABASE_URL)), schema),
 );
 
 export const APIRoute = createAPIFileRoute('/api/push')({
