@@ -68,7 +68,7 @@
 
 @layer base {
   body {
-    @apply text-foreground font-base bg-background;
+    @apply text-foreground font-base bg-secondary-background;
   }
 
   h1,

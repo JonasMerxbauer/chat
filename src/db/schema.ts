@@ -73,22 +73,11 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     { cmp }: ExpressionBuilder<Schema, 'conversation' | 'message'>,
   ) => cmp('user_id', authData.sub);
 
-  // Allow anonymous users to access their local data
-  const isOwnerOrAnon = (
-    authData: AuthData,
-    { cmp }: ExpressionBuilder<Schema, 'conversation' | 'message'>,
-  ) => {
-    if (authData.sub === 'anon') {
-      return cmp('user_id', 'anon');
-    }
-    return cmp('user_id', authData.sub);
-  };
-
   return {
     conversation: {
       row: {
-        select: [isOwnerOrAnon],
-        insert: ANYONE_CAN,
+        select: [isOwner],
+        insert: [isOwner],
         update: {
           preMutation: [isOwner],
         },
@@ -97,8 +86,8 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     },
     message: {
       row: {
-        select: [isOwnerOrAnon],
-        insert: ANYONE_CAN,
+        select: [isOwner],
+        insert: [isOwner],
         update: {
           preMutation: [isOwner],
         },

@@ -128,10 +128,6 @@ function exposeDevHooks(z: Zero<Schema, Mutators>) {
   }
 }
 
-function mark(label: string) {
-  // Development logging removed for production
-}
-
 if (isClient) {
   initializeAuth();
 }
@@ -139,7 +135,6 @@ if (isClient) {
 if (isClient) {
   authAtom.onChange((auth) => {
     zeroAtom.value?.close();
-    mark('creating new zero');
     const authData = auth?.decoded;
     const z = new Zero({
       logLevel: import.meta.env.DEV ? 'info' : 'warn',

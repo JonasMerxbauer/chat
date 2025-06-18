@@ -57,6 +57,10 @@ function RouteComponent() {
   );
   useBackgroundChatPreload(recentChatIds);
 
+  if (isPending) {
+    return null;
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar

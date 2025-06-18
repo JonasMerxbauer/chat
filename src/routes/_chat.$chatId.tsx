@@ -99,7 +99,7 @@ export default function Page() {
 
   return (
     <div className="relative flex h-screen flex-col">
-      <div className="bg-secondary-background/0 absolute top-0 left-0 z-50 flex w-full items-center p-4 backdrop-blur-sm">
+      <div className="bg-secondary-background/75 absolute top-0 left-0 z-50 flex w-full items-center p-4 backdrop-blur-sm">
         <h1 className="text-2xl">{conversation.title}</h1>
       </div>
       <div
