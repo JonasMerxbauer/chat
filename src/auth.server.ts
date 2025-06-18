@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth';
 import { reactStartCookies } from 'better-auth/react-start';
 import { jwt } from 'better-auth/plugins';
 import { Pool } from 'pg';
+import { env } from './env';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -16,8 +17,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
     },
   },
   user: {
