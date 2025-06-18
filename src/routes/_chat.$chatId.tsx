@@ -46,9 +46,27 @@ export default function Page() {
       setShowScrollToBottom(!isAtBottom);
     };
 
+    const checkInitialScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
+      setShowScrollToBottom(!isAtBottom);
+    };
+
     container.addEventListener('scroll', handleScroll);
+
+    setTimeout(checkInitialScroll, 100);
+
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
+    setShowScrollToBottom(!isAtBottom);
+  }, [messages.length]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -88,7 +106,7 @@ export default function Page() {
       <div
         ref={messagesContainerRef}
         data-messages-container
-        className="flex min-h-screen flex-col gap-4 overflow-auto scroll-smooth p-4 pt-16 pb-[200px]"
+        className="flex flex-1 flex-col gap-4 overflow-auto scroll-smooth p-4 pt-16 pb-[200px]"
       >
         {[...messages]
           .sort((a, b) => a.created_at - b.created_at)
