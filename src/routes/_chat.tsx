@@ -6,7 +6,11 @@ import {
   useParams,
 } from '@tanstack/react-router';
 import { AppSidebar } from '~/components/app-sidebar';
-import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '~/components/ui/sidebar';
 import { useSession } from '~/auth';
 import { useZero, useBackgroundChatPreload } from '~/hooks/use-zero';
 import { useMemo } from 'react';
@@ -61,6 +65,9 @@ function RouteComponent() {
         user={session?.user}
       />
       <SidebarInset>
+        <div className="absolute top-5 right-2 z-[100] md:hidden">
+          <SidebarTrigger />
+        </div>
         <Outlet />
       </SidebarInset>
     </SidebarProvider>

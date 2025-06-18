@@ -77,7 +77,9 @@ export default function Page() {
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-4xl">
           <div className="mb-12 text-center">
-            <h1 className="mb-4 text-4xl font-bold">Welcome to ZeroChat</h1>
+            <h1 className="mb-4 text-4xl font-bold">
+              Welcome, {session?.user?.name.split(' ')[0]}
+            </h1>
             <p className="text-muted-foreground text-lg">
               Start a conversation or choose from these example prompts
             </p>

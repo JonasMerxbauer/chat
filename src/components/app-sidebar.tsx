@@ -28,6 +28,7 @@ import {
 import { cn } from '~/lib/utils';
 import { Button } from './ui/button';
 import { useZero } from '~/hooks/use-zero';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function AppSidebar({
   conversations,
@@ -42,6 +43,7 @@ export function AppSidebar({
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
   const z = useZero();
+  const [isEmailBlurred, setIsEmailBlurred] = React.useState(true);
 
   const handleSignOut = async () => {
     try {
@@ -74,6 +76,12 @@ export function AppSidebar({
     } catch (error) {
       console.error('Error deleting conversation:', error);
     }
+  };
+
+  const toggleEmailBlur = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEmailBlurred(!isEmailBlurred);
   };
 
   return (
@@ -133,9 +141,23 @@ export function AppSidebar({
                     className="cursor-pointer overflow-visible group-data-[state=collapsed]:hover:bg-transparent group-data-[state=collapsed]:hover:outline-0"
                     size="lg"
                   >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.image} alt="User" />
+                      <AvatarFallback>
+                        {user.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="font-heading truncate">{user.name}</span>
-                      <span className="truncate text-xs">{user.email}</span>
+                      <span
+                        className={cn(
+                          'cursor-pointer truncate text-xs transition-all duration-200',
+                          isEmailBlurred && 'blur-sm select-none',
+                        )}
+                        onClick={toggleEmailBlur}
+                      >
+                        {user.email}
+                      </span>
                     </div>
                     <ChevronsUpDown className="ml-auto size-4" />
                   </SidebarMenuButton>
@@ -148,11 +170,25 @@ export function AppSidebar({
                 >
                   <DropdownMenuLabel className="font-base p-0">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.image} alt="User" />
+                        <AvatarFallback>
+                          {user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="font-heading truncate">
                           {user.name}
                         </span>
-                        <span className="truncate text-xs">{user.email}</span>
+                        <span
+                          className={cn(
+                            'cursor-pointer truncate text-xs transition-all duration-200',
+                            isEmailBlurred && 'blur-sm select-none',
+                          )}
+                          onClick={toggleEmailBlur}
+                        >
+                          {user.email}
+                        </span>
                       </div>
                     </div>
                   </DropdownMenuLabel>
