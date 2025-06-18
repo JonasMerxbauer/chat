@@ -98,6 +98,16 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
             data-slot="textarea"
             ref={inputRef}
             className="font-base text-foreground placeholder:text-foreground/50 selection:bg-main selection:text-main-foreground flex min-h-[80px] w-full resize-none px-3 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = inputRef.current?.value ?? '';
+                if (message.trim()) {
+                  handleSendMessage(message);
+                  inputRef.current!.value = '';
+                }
+              }
+            }}
             {...props}
           />
         </div>

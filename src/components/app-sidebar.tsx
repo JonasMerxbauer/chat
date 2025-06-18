@@ -81,7 +81,7 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-xl font-bold">
-            ZeroChat
+            <Link to="/">ZeroChat</Link>
           </SidebarGroupLabel>
         </SidebarGroup>
         <SidebarGroup>
