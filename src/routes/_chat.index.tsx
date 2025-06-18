@@ -100,7 +100,7 @@ export default function Page() {
                     <div className="flex-1">
                       <div className="mb-2 flex items-center gap-2">
                         <h3 className="font-semibold">{example.title}</h3>
-                        <span className="bg-secondary rounded-full px-2 py-1 text-xs">
+                        <span className="bg-foreground mt-1 rounded-full px-2 py-1 text-xs text-white">
                           {example.category}
                         </span>
                       </div>
