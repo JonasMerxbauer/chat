@@ -80,6 +80,11 @@ export function AppSidebar({
     <Sidebar collapsible="icon" {...props}>
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel className="text-xl font-bold">
+            ZeroChat
+          </SidebarGroupLabel>
+        </SidebarGroup>
+        <SidebarGroup>
           <Button onClick={() => navigate({ to: '/' })}>New chat</Button>
         </SidebarGroup>
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
