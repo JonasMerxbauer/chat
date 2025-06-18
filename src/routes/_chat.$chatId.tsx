@@ -137,7 +137,7 @@ export default function Page() {
       )}
 
       <div className="absolute bottom-5 w-full">
-        <ChatInput placeholder="Type your message here xd..." />
+        <ChatInput placeholder="Type your message here..." />
       </div>
     </div>
   );
