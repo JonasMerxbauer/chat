@@ -4,9 +4,8 @@ import { schema, type Schema } from '~/db/schema';
 import { createMutators, type Mutators } from '~/db/mutators';
 import { Atom } from '~/atom';
 
-// Type for JWT claims from better-auth
 type AuthData = {
-  sub: string; // User ID from JWT
+  sub: string;
   email?: string;
   role?: string;
 };
@@ -16,27 +15,21 @@ export type LoginState = {
   decoded: AuthData;
 };
 
-// Create atoms for state management
 const zeroAtom = new Atom<Zero<Schema, Mutators>>();
 const authAtom = new Atom<LoginState>();
 
-// Check if we're on the client side
 const isClient = typeof window !== 'undefined';
 
-// Create the better-auth client
 const authClient = createAuthClient({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
 });
 
-// Export auth methods
 export const { signIn, signUp, signOut, useSession, deleteUser } = authClient;
 
-// Function to get JWT token from better-auth
 export async function getJWT(): Promise<string | null> {
   if (!isClient) return null;
 
   try {
-    // Method 1: Try to get JWT from getSession with set-auth-jwt header
     await authClient.getSession({
       fetchOptions: {
         onSuccess: (ctx) => {
@@ -48,13 +41,29 @@ export async function getJWT(): Promise<string | null> {
       },
     });
 
-    // Check if we got the JWT from the header
     const cachedJWT = localStorage.getItem('zero-jwt');
     if (cachedJWT) {
-      return cachedJWT;
+      try {
+        const payload = cachedJWT.split('.')[1];
+        if (payload) {
+          const decoded = JSON.parse(atob(payload));
+          const currentTime = Math.floor(Date.now() / 1000);
+
+          if (decoded.exp && decoded.exp <= currentTime + 300) {
+            console.log(
+              '[Zero Auth] Token expired or expiring soon, refreshing...',
+            );
+            localStorage.removeItem('zero-jwt');
+          } else {
+            return cachedJWT;
+          }
+        }
+      } catch (error) {
+        console.warn('[Zero Auth] Failed to check token expiration:', error);
+        localStorage.removeItem('zero-jwt');
+      }
     }
 
-    // Method 2: If no JWT from getSession, try the /api/auth/token endpoint
     const tokenResponse = await fetch('/api/auth/token', {
       credentials: 'include',
     });
@@ -73,7 +82,6 @@ export async function getJWT(): Promise<string | null> {
   return null;
 }
 
-// Function to get decoded JWT token
 export async function getJwt(): Promise<AuthData | null> {
   if (!isClient) return null;
 
@@ -81,7 +89,6 @@ export async function getJwt(): Promise<AuthData | null> {
     const token = await getJWT();
     if (!token) return null;
 
-    // Decode JWT (simple base64 decode for the payload)
     const payload = token.split('.')[1];
     if (!payload) return null;
 
@@ -93,21 +100,18 @@ export async function getJwt(): Promise<AuthData | null> {
   }
 }
 
-// Function to get raw JWT token
 export function getRawJwt(): string | null {
-  if (!isClient) return null; // Only run on client
+  if (!isClient) return null;
   return localStorage.getItem('zero-jwt');
 }
 
-// Function to clear JWT and auth state
 export function clearJwt() {
-  if (!isClient) return; // Only run on client
+  if (!isClient) return;
   localStorage.removeItem('zero-jwt');
 }
 
-// Initialize auth state function
 const initializeAuth = async () => {
-  if (!isClient) return; // Only run on client
+  if (!isClient) return;
 
   const jwt = await getJwt();
   const encodedJwt = await getJWT();
@@ -121,26 +125,22 @@ const initializeAuth = async () => {
       : undefined;
 };
 
-// Development hooks for debugging
 function exposeDevHooks(z: Zero<Schema, Mutators>) {
   if (import.meta.env.DEV && isClient) {
     (window as any).zero = z;
   }
 }
 
-// Mark function for performance debugging
 function mark(label: string) {
   if (import.meta.env.DEV) {
     console.log(`[Zero] ${label}`);
   }
 }
 
-// Initialize immediately (only on client)
 if (isClient) {
   initializeAuth();
 }
 
-// Set up reactive Zero instance creation (only on client)
 if (isClient) {
   authAtom.onChange((auth) => {
     zeroAtom.value?.close();
@@ -151,9 +151,28 @@ if (isClient) {
       server: import.meta.env.VITE_ZERO_SERVER || 'http://localhost:4848',
       userID: authData?.sub ?? 'anon',
       mutators: createMutators(),
-      auth: (error?: 'invalid-token') => {
+      auth: async (error?: 'invalid-token') => {
         if (error === 'invalid-token') {
+          console.log('[Zero Auth] Token invalidated, attempting refresh...');
           clearJwt();
+
+          try {
+            const newToken = await getJWT();
+            if (newToken) {
+              console.log('[Zero Auth] Token refreshed successfully');
+              const newDecoded = await getJwt();
+              if (newDecoded) {
+                authAtom.value = {
+                  encoded: newToken,
+                  decoded: newDecoded,
+                };
+                return newToken;
+              }
+            }
+          } catch (error) {
+            console.error('[Zero Auth] Failed to refresh token:', error);
+          }
+
           authAtom.value = undefined;
           return undefined;
         }
@@ -167,15 +186,43 @@ if (isClient) {
   });
 }
 
-// Refresh JWT and auth state (call this after successful login)
+export function isTokenExpired(token: string): boolean {
+  if (!token) return true;
+
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return true;
+
+    const decoded = JSON.parse(atob(payload));
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return decoded.exp && decoded.exp <= currentTime + 300;
+  } catch (error) {
+    console.error('Failed to check token expiration:', error);
+    return true;
+  }
+}
+
+export async function forceRefreshToken(): Promise<string | null> {
+  if (!isClient) return null;
+
+  clearJwt();
+
+  const newToken = await getJWT();
+  if (newToken) {
+    await refreshAuth();
+  }
+
+  return newToken;
+}
+
 export async function refreshAuth() {
   if (!isClient) return;
   await initializeAuth();
 }
 
-// Clear all Zero data on logout
 export async function clearZeroData() {
-  if (!isClient) return; // Only run on client
+  if (!isClient) return;
 
   clearJwt();
   authAtom.value = undefined;
