@@ -4,14 +4,9 @@ export const MODELS = {
     name: 'GPT-4o',
     provider: 'OPENAI',
   },
-  GPT_4O_MINI: {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    provider: 'OPENAI',
-  },
-  CLAUDE_3_5_SONNET: {
-    id: 'claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
+  CLAUDE_3_HAIKU: {
+    id: 'claude-3-haiku-20240307',
+    name: 'Claude 3 Haiku',
     provider: 'ANTHROPIC',
   },
   GEMINI_2_0_FLASH: {
@@ -24,8 +19,8 @@ export const MODELS = {
 export const DEFAULT_MODEL = MODELS.GEMINI_2_0_FLASH;
 
 export const FREE_MODELS = [
-  MODELS.GPT_4O_MINI,
-  MODELS.CLAUDE_3_5_SONNET,
+  MODELS.GPT_4O,
+  MODELS.CLAUDE_3_HAIKU,
   MODELS.GEMINI_2_0_FLASH,
 ];
 
