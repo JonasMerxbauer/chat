@@ -1,2 +1,8 @@
 // Re-export from the zero-auth module
-export { signIn, signUp, signOut, useSession } from '~/lib/zero-auth';
+export {
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  deleteUser,
+} from '~/lib/zero-auth';

@@ -1,15 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { signOut } from '~/auth';
 import { clearZeroData } from '~/lib/zero-auth';
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-  X,
-} from 'lucide-react';
+import { BadgeCheck, ChevronsUpDown, Info, LogOut, X } from 'lucide-react';
 
 import * as React from 'react';
 import {
@@ -133,7 +125,7 @@ export function AppSidebar({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
-                    className="overflow-visible group-data-[state=collapsed]:hover:bg-transparent group-data-[state=collapsed]:hover:outline-0"
+                    className="cursor-pointer overflow-visible group-data-[state=collapsed]:hover:bg-transparent group-data-[state=collapsed]:hover:outline-0"
                     size="lg"
                   >
                     <div className="grid flex-1 text-left text-sm leading-tight">
@@ -161,28 +153,24 @@ export function AppSidebar({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <Sparkles />
-                      Upgrade to Pro
+                    <DropdownMenuItem className="cursor-pointer" asChild>
+                      <Link to="/account">
+                        <BadgeCheck />
+                        Account
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" asChild>
+                      <Link to="/about">
+                        <Info />
+                        About
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <BadgeCheck />
-                      Account
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <CreditCard />
-                      Billing
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Bell />
-                      Notifications
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={handleSignOut}
+                  >
                     <LogOut />
                     Log out
                   </DropdownMenuItem>

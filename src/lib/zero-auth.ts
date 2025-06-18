@@ -29,7 +29,7 @@ const authClient = createAuthClient({
 });
 
 // Export auth methods
-export const { signIn, signUp, signOut, useSession } = authClient;
+export const { signIn, signUp, signOut, useSession, deleteUser } = authClient;
 
 // Function to get JWT token from better-auth
 export async function getJWT(): Promise<string | null> {
@@ -147,6 +147,7 @@ if (isClient) {
     mark('creating new zero');
     const authData = auth?.decoded;
     const z = new Zero({
+      logLevel: import.meta.env.DEV ? 'info' : 'warn',
       server: import.meta.env.VITE_ZERO_SERVER || 'http://localhost:4848',
       userID: authData?.sub ?? 'anon',
       mutators: createMutators(),
