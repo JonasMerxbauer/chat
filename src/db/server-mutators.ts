@@ -5,7 +5,7 @@ import {
   generateConversationTitle,
   streamAIResponse,
 } from '~/utils/ai-operations';
-import { MESSAGE_STATUSES, MESSAGE_TYPES } from '~/constants';
+import { MESSAGE_STATUSES } from '~/constants';
 
 export function createMutators() {
   const clientMutators = createClientMutators();

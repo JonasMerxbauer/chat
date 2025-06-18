@@ -98,6 +98,11 @@ function RouteComponent() {
                         Delete Account
                       </DialogTitle>
                       <DialogDescription className="space-y-2">
+                        {error && (
+                          <p className="text-destructive font-medium">
+                            {error}
+                          </p>
+                        )}
                         <p>
                           This action will permanently delete your account and
                           all associated data including:
