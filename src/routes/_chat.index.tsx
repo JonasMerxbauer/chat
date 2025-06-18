@@ -49,7 +49,6 @@ export default function Page() {
 
   const handleExampleClick = async (prompt: string) => {
     if (!userId) {
-      console.error('User ID is required');
       return;
     }
 

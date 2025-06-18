@@ -50,9 +50,6 @@ export async function getJWT(): Promise<string | null> {
           const currentTime = Math.floor(Date.now() / 1000);
 
           if (decoded.exp && decoded.exp <= currentTime + 300) {
-            console.log(
-              '[Zero Auth] Token expired or expiring soon, refreshing...',
-            );
             localStorage.removeItem('zero-jwt');
           } else {
             return cachedJWT;
@@ -132,9 +129,7 @@ function exposeDevHooks(z: Zero<Schema, Mutators>) {
 }
 
 function mark(label: string) {
-  if (import.meta.env.DEV) {
-    console.log(`[Zero] ${label}`);
-  }
+  // Development logging removed for production
 }
 
 if (isClient) {
@@ -153,13 +148,11 @@ if (isClient) {
       mutators: createMutators(),
       auth: async (error?: 'invalid-token') => {
         if (error === 'invalid-token') {
-          console.log('[Zero Auth] Token invalidated, attempting refresh...');
           clearJwt();
 
           try {
             const newToken = await getJWT();
             if (newToken) {
-              console.log('[Zero Auth] Token refreshed successfully');
               const newDecoded = await getJwt();
               if (newDecoded) {
                 authAtom.value = {

@@ -39,8 +39,6 @@ function RouteComponent() {
       // Delete the user account using Better Auth
       const result = await deleteUser();
 
-      console.log('result', result);
-
       if (result.error) {
         setError(result.error.message || 'Failed to delete account');
         return;

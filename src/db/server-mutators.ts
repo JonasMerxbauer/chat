@@ -32,14 +32,6 @@ export function createMutators() {
           userId: string;
         },
       ) => {
-        console.log(
-          'Creating conversation',
-          id,
-          content,
-          'with model:',
-          model.name,
-        );
-
         // First, create the conversation record using client mutator
         await clientMutators.conversation.createConversation(tx, {
           id,
@@ -91,9 +83,6 @@ export function createMutators() {
             console.error('Failed to trigger streaming:', error);
           }
         })();
-
-        console.log('AI streaming triggered for response:', responseId);
-        console.log('AI title generation triggered for conversation:', id);
       },
 
       createMessage: async (
@@ -116,8 +105,6 @@ export function createMutators() {
           userId: string;
         },
       ) => {
-        console.log('Sending prompt', id, content, 'with model:', model.name);
-
         // Create user message
         await clientMutators.conversation.createMessage(tx, {
           id: id,
@@ -150,8 +137,6 @@ export function createMutators() {
             console.error('Failed to trigger streaming:', error);
           }
         })();
-
-        console.log('AI streaming triggered for response:', responseId);
       },
     },
   } as const satisfies CustomMutatorDefs<Schema>;

@@ -16,8 +16,6 @@ const processor = new PushProcessor(
 export const APIRoute = createAPIFileRoute('/api/push')({
   POST: async ({ request }) => {
     try {
-      console.log('Processing push request');
-
       const result = await processor.process(createMutators(), request);
 
       return new Response(JSON.stringify(result), {

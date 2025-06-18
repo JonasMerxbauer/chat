@@ -43,12 +43,7 @@ export function useBackgroundChatPreload(recentChatIds: string[] = []) {
         .preload();
     });
 
-    if (import.meta.env.DEV) {
-      console.log(
-        `[Zero] Preloaded ${recentChatIds.length} conversations:`,
-        recentChatIds,
-      );
-    }
+    // Development logging removed for production
   }, [z, recentChatIds.join(',')]);
 }
 
@@ -64,8 +59,6 @@ export function usePreloadSpecificChat(chatId: string | null) {
     // Preload this specific conversation immediately
     z.query.conversation.related('messages').where('id', '=', chatId).preload();
 
-    if (import.meta.env.DEV) {
-      console.log(`[Zero] Preloaded specific chat:`, chatId);
-    }
+    // Development logging removed for production
   }, [z, chatId]);
 }

@@ -39,8 +39,6 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
   const userId = session?.user?.id;
 
   const handleSendMessage = async (message: string) => {
-    console.log('Sending message', message);
-
     if (!userId) {
       throw new Error('User ID is required');
     }

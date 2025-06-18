@@ -26,8 +26,6 @@ export async function generateConversationTitle(
   model = DEFAULT_MODEL,
 ) {
   try {
-    console.log(`Generating title for conversation ${conversationId}`);
-
     // Use the appropriate AI model for title generation
     let aiModel;
     if (model.provider === 'OPENAI') {
@@ -54,7 +52,6 @@ export async function generateConversationTitle(
         'UPDATE conversation SET title = $1, updated_at = to_timestamp($2) WHERE id = $3',
         [title.trim(), Date.now() / 1000, conversationId],
       );
-      console.log(`Updated title for conversation ${conversationId}: ${title}`);
     } finally {
       client.release();
     }
@@ -72,10 +69,6 @@ export async function streamAIResponse(
   model = DEFAULT_MODEL,
 ) {
   try {
-    console.log(
-      `Starting AI streaming for response ${responseId} with model ${model.name}`,
-    );
-
     // Update status to streaming
     const client = await streamingPool.connect();
     await client.query('UPDATE message SET status = $1 WHERE id = $2', [
@@ -90,7 +83,6 @@ export async function streamAIResponse(
 
       try {
         await handleTextGeneration(streamClient, responseId, content, model);
-        console.log(`Completed AI processing for response ${responseId}`);
       } catch (error) {
         console.error(`AI processing error for ${responseId}:`, error);
 
