@@ -3,7 +3,7 @@ import { ChatInput } from '~/components/chat-input';
 import { Card } from '~/components/ui/card';
 import { useSession } from '~/lib/zero-auth';
 import { useZero } from '~/hooks/use-zero';
-import { DEFAULT_MODEL } from '~/constants';
+import { DEFAULT_MODEL } from '~/models';
 import { MessageSquare, Code, Lightbulb, HelpCircle } from 'lucide-react';
 
 export const Route = createFileRoute('/_chat/')({

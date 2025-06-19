@@ -13,7 +13,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { DEFAULT_MODEL, getAllModels, MESSAGE_STATUSES } from '~/constants';
+import { DEFAULT_MODEL, getAllModels, MESSAGE_STATUSES } from '~/models';
 import { useSession } from '~/lib/zero-auth';
 import { useZero } from '~/hooks/use-zero';
 import { cn } from '~/lib/utils';
@@ -156,7 +156,9 @@ export const Message = ({ message }: { message: any }) => {
 
     switch (status) {
       case MESSAGE_STATUSES.PENDING:
-        return 'Thinking...';
+        return 'Sending...';
+      case MESSAGE_STATUSES.REASONING:
+        return 'Reasoning...';
       case MESSAGE_STATUSES.ERROR:
         return 'Error occurred';
       default:
@@ -179,8 +181,17 @@ export const Message = ({ message }: { message: any }) => {
         {/* Status indicator for AI messages */}
         {role === 'assistant' &&
           (status === MESSAGE_STATUSES.PENDING ||
+            status === MESSAGE_STATUSES.REASONING ||
             status === MESSAGE_STATUSES.STREAMING) && (
             <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
+              {status === MESSAGE_STATUSES.REASONING ||
+                (status === MESSAGE_STATUSES.PENDING && (
+                  <div className="flex gap-1">
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400"></div>
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:0.1s]"></div>
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:0.2s]"></div>
+                  </div>
+                ))}
               <span>{getStatusText()}</span>
             </div>
           )}

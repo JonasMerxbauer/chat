@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai';
 import { google } from '@ai-sdk/google';
 import { anthropic } from '@ai-sdk/anthropic';
 import { Pool } from 'pg';
-import { DEFAULT_MODEL, MESSAGE_STATUSES } from '~/constants';
+import { DEFAULT_MODEL, MESSAGE_STATUSES } from '~/models';
 
 // Create shared database pools
 const titlePool = new Pool({
@@ -26,26 +26,14 @@ export async function generateConversationTitle(
   model = DEFAULT_MODEL,
 ) {
   try {
-    // Use the appropriate AI model for title generation
-    let aiModel;
-    if (model.provider === 'OPENAI') {
-      aiModel = openai(model.id);
-    } else if (model.provider === 'GOOGLE') {
-      aiModel = google(model.id);
-    } else if (model.provider === 'ANTHROPIC') {
-      aiModel = anthropic(model.id);
-    } else {
-      aiModel = google(DEFAULT_MODEL.id); // fallback
-    }
+    const { model: aiModel } = getProvider(model);
 
-    // Generate title using AI
     const { text: title } = await generateText({
       model: aiModel,
       prompt: `Generate a concise, informative title (max 60 characters) for a conversation that starts with this message: "${content}". The title should capture the main topic or question. Only return the title, nothing else.`,
       maxTokens: 20,
     });
 
-    // Update the conversation title in the database
     const client = await titlePool.connect();
     try {
       await client.query(
@@ -69,15 +57,21 @@ export async function streamAIResponse(
   model = DEFAULT_MODEL,
 ) {
   try {
-    // Update status to streaming
+    const isReasoningModel =
+      model.provider === 'OPENAI' &&
+      (model.id.startsWith('o1') ||
+        model.id.startsWith('o3') ||
+        model.id.startsWith('o4'));
+
     const client = await streamingPool.connect();
     await client.query('UPDATE message SET status = $1 WHERE id = $2', [
-      MESSAGE_STATUSES.STREAMING,
+      isReasoningModel
+        ? MESSAGE_STATUSES.REASONING
+        : MESSAGE_STATUSES.STREAMING,
       responseId,
     ]);
     client.release();
 
-    // Start processing in the background
     setTimeout(async () => {
       const streamClient = await streamingPool.connect();
 
@@ -86,7 +80,6 @@ export async function streamAIResponse(
       } catch (error) {
         console.error(`AI processing error for ${responseId}:`, error);
 
-        // Update message with error status
         await streamClient.query(
           'UPDATE message SET content = $1, status = $2, updated_at = $3 WHERE id = $4',
           [
@@ -114,34 +107,60 @@ async function handleTextGeneration(
   prompt: string,
   model: any,
 ) {
-  // Get the appropriate AI model
-  let aiModel;
-  if (model.provider === 'OPENAI') {
-    aiModel = openai(model.id);
-  } else if (model.provider === 'GOOGLE') {
-    aiModel = google(model.id);
-  } else if (model.provider === 'ANTHROPIC') {
-    aiModel = anthropic(model.id);
-  } else {
-    throw new Error(`Unsupported model provider: ${model.provider}`);
+  const { model: aiModel, providerOptions } = getProvider(model);
+
+  const isReasoningModel =
+    model.provider === 'OPENAI' &&
+    (model.id.startsWith('o1') ||
+      model.id.startsWith('o3') ||
+      model.id.startsWith('o4'));
+
+  const messages = [];
+
+  if (isReasoningModel) {
+    messages.push({
+      role: 'system',
+      content:
+        'Formatting re-enabled - please enclose code blocks with appropriate markdown tags and use proper formatting for all code examples.',
+    });
   }
 
-  // Configure the stream options
+  messages.push({
+    role: 'user',
+    content: prompt,
+  });
+
   const streamOptions: any = {
     model: aiModel,
-    prompt: prompt,
+    messages: messages,
+    providerOptions,
   };
 
   const { textStream } = streamText(streamOptions);
 
   let fullResponse = '';
   let updateCount = 0;
+  let hasStartedStreaming = false;
+
+  if (isReasoningModel) {
+    await client.query(
+      'UPDATE message SET status = $1, updated_at = $2 WHERE id = $3',
+      [MESSAGE_STATUSES.REASONING, Date.now(), responseId],
+    );
+  }
 
   for await (const textPart of textStream) {
+    if (isReasoningModel && !hasStartedStreaming) {
+      hasStartedStreaming = true;
+      await client.query(
+        'UPDATE message SET status = $1, updated_at = $2 WHERE id = $3',
+        [MESSAGE_STATUSES.STREAMING, Date.now(), responseId],
+      );
+    }
+
     fullResponse += textPart;
     updateCount++;
 
-    // Batch updates to reduce database load
     if (
       updateCount % 5 === 0 ||
       textPart.includes(' ') ||
@@ -154,9 +173,27 @@ async function handleTextGeneration(
     }
   }
 
-  // Final update - mark as complete
   await client.query(
     'UPDATE message SET content = $1, status = $2, updated_at = $3 WHERE id = $4',
     [fullResponse, MESSAGE_STATUSES.COMPLETE, Date.now(), responseId],
   );
 }
+
+const getProvider = (model: any) => {
+  if (model.provider === 'OPENAI') {
+    if (model.id === 'o3-mini') {
+      return {
+        model: openai(model.id),
+        providerOptions: { openai: { reasoningEffort: 'low' } },
+      };
+    } else {
+      return { model: openai(model.id), providerOptions: {} };
+    }
+  } else if (model.provider === 'GOOGLE') {
+    return { model: google(model.id), providerOptions: {} };
+  } else if (model.provider === 'ANTHROPIC') {
+    return { model: anthropic(model.id), providerOptions: {} };
+  }
+
+  return { model: google(DEFAULT_MODEL.id), providerOptions: {} };
+};

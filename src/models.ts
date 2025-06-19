@@ -1,7 +1,12 @@
 export const MODELS = {
+  GPT_O3_MINI: {
+    id: 'o3-mini',
+    name: 'GPT o3 mini',
+    provider: 'OPENAI',
+  },
   GPT_4O: {
     id: 'gpt-4o',
-    name: 'GPT-4o',
+    name: 'GPT 4o',
     provider: 'OPENAI',
   },
   CLAUDE_3_HAIKU: {
@@ -19,6 +24,7 @@ export const MODELS = {
 export const DEFAULT_MODEL = MODELS.GEMINI_2_0_FLASH;
 
 export const FREE_MODELS = [
+  MODELS.GPT_O3_MINI,
   MODELS.GPT_4O,
   MODELS.CLAUDE_3_HAIKU,
   MODELS.GEMINI_2_0_FLASH,
@@ -38,6 +44,7 @@ export const findModelById = (modelId: string) => {
 export const MESSAGE_STATUSES = {
   SENDING: 'sending',
   PENDING: 'pending',
+  REASONING: 'reasoning',
   STREAMING: 'streaming',
   COMPLETE: 'complete',
   ERROR: 'error',

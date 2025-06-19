@@ -5,7 +5,7 @@ import {
   generateConversationTitle,
   streamAIResponse,
 } from '~/utils/ai-operations';
-import { MESSAGE_STATUSES } from '~/constants';
+import { MESSAGE_STATUSES } from '~/models';
 
 export function createMutators() {
   const clientMutators = createClientMutators();
@@ -69,7 +69,7 @@ export function createMutators() {
         // Trigger AI title generation (fire and forget)
         (async () => {
           try {
-            await generateConversationTitle(id, content, model);
+            await generateConversationTitle(id, content);
           } catch (error) {
             console.error('Failed to generate title:', error);
           }
