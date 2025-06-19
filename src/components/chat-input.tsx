@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
@@ -36,17 +36,14 @@ export const ChatInput = ({
 
   const conversationId = params?.chatId ?? '';
 
-  // Local state for model selection when no conversation exists
   const [localSelectedModel, setLocalSelectedModel] = useState<{
     id: string;
     provider: string;
     name: string;
   }>(DEFAULT_MODEL);
 
-  // Local state for web search toggle
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
 
-  // State for uploaded files
   const [uploadedFiles, setUploadedFiles] = useState<
     Array<{
       id: string;
@@ -57,6 +54,41 @@ export const ChatInput = ({
       isLoading: boolean;
     }>
   >([]);
+
+  const lastScrolledMessageId = useRef<string | null>(null);
+
+  const isAtBottom = useCallback((container: Element) => {
+    const threshold = 10;
+    return (
+      container.scrollTop >=
+      container.scrollHeight - container.clientHeight - threshold
+    );
+  }, []);
+
+  const scrollToBottomIfNeeded = useCallback(
+    (messageId: string) => {
+      if (lastScrolledMessageId.current === messageId) {
+        return;
+      }
+
+      const messagesContainer = document.querySelector(
+        '[data-messages-container]',
+      );
+      if (messagesContainer && !isAtBottom(messagesContainer)) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        lastScrolledMessageId.current = messageId;
+      }
+    },
+    [isAtBottom],
+  );
+
+  const resetScrollTracking = useCallback(() => {
+    lastScrolledMessageId.current = null;
+  }, []);
+
+  useEffect(() => {
+    resetScrollTracking();
+  }, [conversationId, resetScrollTracking]);
 
   const currentModel = conversation
     ? {
@@ -97,16 +129,10 @@ export const ChatInput = ({
           })),
       });
 
-      // Clear uploaded files after sending
       setUploadedFiles([]);
 
       setTimeout(() => {
-        const messagesContainer = document.querySelector(
-          '[data-messages-container]',
-        );
-        if (messagesContainer) {
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+        scrollToBottomIfNeeded(messageId);
       }, 100);
     } else {
       const conversationId = crypto.randomUUID();
@@ -130,7 +156,6 @@ export const ChatInput = ({
           })),
       });
 
-      // Clear uploaded files after sending
       setUploadedFiles([]);
 
       navigate({
@@ -139,6 +164,10 @@ export const ChatInput = ({
           chatId: conversationId,
         },
       });
+
+      setTimeout(() => {
+        scrollToBottomIfNeeded(messageId);
+      }, 200);
     }
   };
 
