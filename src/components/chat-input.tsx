@@ -101,10 +101,13 @@ export const ChatInput = ({
   const { data: session } = useSession();
 
   const userId = session?.user?.id;
+  const isAuthenticated = !!session?.user;
 
   const handleSendMessage = async (message: string) => {
-    if (!userId) {
-      throw new Error('User ID is required');
+    if (!isAuthenticated || !userId) {
+      console.warn('Cannot send message: User not authenticated');
+      navigate({ to: '/auth' });
+      return;
     }
 
     if (conversationId) {
@@ -191,7 +194,27 @@ export const ChatInput = ({
 
   return (
     <div className="mx-auto w-full max-w-[800px]">
-      <div className="rounded-base border-border bg-secondary-background mx-4 flex w-auto flex-col border-2 p-2 focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-2 focus-within:outline-none">
+      <div
+        className={cn(
+          'rounded-base border-border bg-secondary-background mx-4 flex w-auto flex-col border-2 p-2 focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-2 focus-within:outline-none',
+          !isAuthenticated && 'opacity-50',
+        )}
+      >
+        {!isAuthenticated && (
+          <div className="mb-2 rounded-md border border-yellow-200 bg-yellow-50 p-2">
+            <p className="text-sm text-yellow-800">
+              Please{' '}
+              <button
+                onClick={() => navigate({ to: '/auth' })}
+                className="font-medium underline hover:text-yellow-900"
+              >
+                sign in
+              </button>{' '}
+              to send messages.
+            </p>
+          </div>
+        )}
+
         {uploadedFiles.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
             {uploadedFiles.map((file) => (
@@ -234,8 +257,19 @@ export const ChatInput = ({
           <textarea
             data-slot="textarea"
             ref={inputRef}
+            disabled={!isAuthenticated}
+            placeholder={
+              isAuthenticated
+                ? props.placeholder
+                : 'Please sign in to send messages...'
+            }
             className="font-base text-foreground placeholder:text-foreground/50 selection:bg-main selection:text-main-foreground flex min-h-[80px] w-full resize-none p-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             onKeyDown={(e) => {
+              if (!isAuthenticated) {
+                e.preventDefault();
+                return;
+              }
+
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 const message = inputRef.current?.value ?? '';
@@ -253,13 +287,15 @@ export const ChatInput = ({
           <div className="flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>{currentModel.name}</Button>
+                <Button disabled={!isAuthenticated}>{currentModel.name}</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {getAllModels().map((model) => (
                   <DropdownMenuItem
                     key={model.id}
                     onClick={() => {
+                      if (!isAuthenticated) return;
+
                       if (conversationId) {
                         // Update existing conversation's model
                         z.mutate.conversation.updateConversationModel({
@@ -280,7 +316,10 @@ export const ChatInput = ({
             <UploadButton
               endpoint="fileUploader"
               className="upload-button-custom"
+              disabled={!isAuthenticated}
               onUploadBegin={(name) => {
+                if (!isAuthenticated) return;
+
                 const fileId = crypto.randomUUID();
                 setUploadedFiles((prev) => [
                   ...prev,
@@ -324,7 +363,7 @@ export const ChatInput = ({
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer',
+                  cursor: isAuthenticated ? 'pointer' : 'not-allowed',
                   whiteSpace: 'nowrap',
                   borderRadius: '10px',
                   fontSize: '14px',
@@ -333,24 +372,30 @@ export const ChatInput = ({
                   gap: '8px',
                   outline: 'none',
                   pointerEvents: 'auto',
-                  backgroundColor: 'oklch(67.47% 0.1726 259.49)',
+                  backgroundColor: isAuthenticated
+                    ? 'oklch(67.47% 0.1726 259.49)'
+                    : 'oklch(50% 0.05 259.49)',
                   color: 'oklch(0% 0 0)',
                   border: '2px solid oklch(0% 0 0)',
                   boxShadow: '0px 2px 0px 0px oklch(0% 0 0)',
                   height: '40px',
                   padding: '8px 16px',
+                  opacity: isAuthenticated ? 1 : 0.5,
                 }),
                 container: 'flex',
                 allowedContent: 'hidden',
               }}
               content={{
-                button: 'Attach images',
+                button: isAuthenticated ? 'Attach images' : 'Sign in to attach',
               }}
             />
             {currentModel.id === 'gpt-4o' && (
               <Button
                 variant={webSearchEnabled ? 'default' : 'neutral'}
-                onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+                disabled={!isAuthenticated}
+                onClick={() =>
+                  isAuthenticated && setWebSearchEnabled(!webSearchEnabled)
+                }
                 className="flex items-center gap-2"
               >
                 <Globe className="h-4 w-4" />
@@ -360,7 +405,13 @@ export const ChatInput = ({
           </div>
 
           <Button
+            disabled={!isAuthenticated}
             onClick={() => {
+              if (!isAuthenticated) {
+                navigate({ to: '/auth' });
+                return;
+              }
+
               const message = inputRef.current?.value ?? '';
               if (message.trim() || uploadedFiles.some((f) => !f.isLoading)) {
                 handleSendMessage(message);

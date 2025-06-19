@@ -24,7 +24,42 @@ const authClient = createAuthClient({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
 });
 
-export const { signIn, signUp, signOut, useSession, deleteUser } = authClient;
+export async function signOut() {
+  try {
+    const result = await authClient.signOut();
+
+    clearJwt();
+    authAtom.value = undefined;
+
+    if (isClient) {
+      localStorage.setItem('auth-logout-broadcast', Date.now().toString());
+      localStorage.removeItem('auth-logout-broadcast');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Sign out error:', error);
+    throw error;
+  }
+}
+
+export const { signIn, signUp, useSession, deleteUser } = authClient;
+
+if (isClient) {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'auth-logout-broadcast') {
+      clearJwt();
+      authAtom.value = undefined;
+      window.location.reload();
+    }
+
+    if (e.key === 'zero-jwt') {
+      if (e.newValue === null) {
+        authAtom.value = undefined;
+      }
+    }
+  });
+}
 
 export async function getJWT(): Promise<string | null> {
   if (!isClient) return null;
@@ -216,6 +251,17 @@ export async function clearZeroData() {
   authAtom.value = undefined;
   const { dropAllDatabases } = await import('@rocicorp/zero');
   return dropAllDatabases();
+}
+
+// Hook to check if user is authenticated
+export function useAuthState() {
+  if (!isClient) return { isAuthenticated: false, user: null };
+
+  const auth = authAtom.value;
+  return {
+    isAuthenticated: !!auth?.decoded,
+    user: auth?.decoded || null,
+  };
 }
 
 export { authAtom as authRef, zeroAtom as zeroRef };
