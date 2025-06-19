@@ -248,18 +248,6 @@ export const ChatInput = ({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Web Search Toggle - Only show for OpenAI models */}
-            {currentModel.id === 'gpt-4o' && (
-              <Button
-                variant={webSearchEnabled ? 'default' : 'neutral'}
-                onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                className="flex items-center gap-2"
-              >
-                <Globe className="h-4 w-4" />
-                Web Search
-              </Button>
-            )}
             <UploadButton
               endpoint="fileUploader"
               className="upload-button-custom"
@@ -330,6 +318,16 @@ export const ChatInput = ({
                 button: 'Attach images',
               }}
             />
+            {currentModel.id === 'gpt-4o' && (
+              <Button
+                variant={webSearchEnabled ? 'default' : 'neutral'}
+                onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+                className="flex items-center gap-2"
+              >
+                <Globe className="h-4 w-4" />
+                Web Search
+              </Button>
+            )}
           </div>
 
           <Button
