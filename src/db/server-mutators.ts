@@ -23,6 +23,7 @@ export function createMutators() {
           content,
           model,
           userId,
+          webSearchEnabled,
         }: {
           id: string;
           title: string;
@@ -30,6 +31,7 @@ export function createMutators() {
           content: string;
           model: any;
           userId: string;
+          webSearchEnabled?: boolean;
         },
       ) => {
         // First, create the conversation record using client mutator
@@ -40,18 +42,10 @@ export function createMutators() {
           title,
           userId,
           model,
+          webSearchEnabled,
         });
 
-        // Create user message
-        await clientMutators.conversation.createMessage(tx, {
-          id: messageId,
-          conversationId: id,
-          content,
-          model,
-          role: 'user',
-          status: MESSAGE_STATUSES.COMPLETE,
-          userId,
-        });
+        // Note: The initial message is already created by the client mutator above
 
         const responseId = crypto.randomUUID();
 
@@ -78,7 +72,12 @@ export function createMutators() {
         // Trigger AI streaming (fire and forget)
         (async () => {
           try {
-            await streamAIResponse(responseId, content, model);
+            await streamAIResponse(
+              responseId,
+              content,
+              model,
+              webSearchEnabled,
+            );
           } catch (error) {
             console.error('Failed to trigger streaming:', error);
           }
@@ -95,6 +94,7 @@ export function createMutators() {
           status,
           model,
           userId,
+          webSearchEnabled,
         }: {
           id: string;
           conversationId: string;
@@ -103,6 +103,7 @@ export function createMutators() {
           status: string;
           model: any;
           userId: string;
+          webSearchEnabled?: boolean;
         },
       ) => {
         // Create user message
@@ -114,6 +115,7 @@ export function createMutators() {
           role: 'user',
           status: MESSAGE_STATUSES.COMPLETE,
           userId,
+          webSearchEnabled,
         });
 
         const responseId = crypto.randomUUID();
@@ -132,7 +134,12 @@ export function createMutators() {
         // Trigger AI streaming (fire and forget)
         (async () => {
           try {
-            await streamAIResponse(responseId, content, model);
+            await streamAIResponse(
+              responseId,
+              content,
+              model,
+              webSearchEnabled,
+            );
           } catch (error) {
             console.error('Failed to trigger streaming:', error);
           }

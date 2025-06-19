@@ -16,6 +16,7 @@ const message = table('message')
     created_at: number(),
     updated_at: number(),
     user_id: string(),
+    web_search_enabled: string().optional(), // 'true' | 'false' | null
   })
   .primaryKey('id');
 
@@ -57,7 +58,6 @@ export type Schema = typeof schema;
 
 import {
   definePermissions,
-  ANYONE_CAN,
   type ExpressionBuilder,
   type PermissionsConfig,
 } from '@rocicorp/zero';

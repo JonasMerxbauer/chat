@@ -13,6 +13,7 @@ export function createMutators() {
           model,
           title,
           userId,
+          webSearchEnabled,
         }: {
           id: string;
           messageId: string;
@@ -20,6 +21,7 @@ export function createMutators() {
           model: any;
           title: string;
           userId: string;
+          webSearchEnabled?: boolean;
         },
       ) => {
         const now = Date.now();
@@ -33,6 +35,19 @@ export function createMutators() {
           current_model_provider: model.provider,
           current_model_name: model.name,
         });
+
+        // Create the initial message
+        await tx.mutate.message.insert({
+          id: messageId,
+          content,
+          role: 'user',
+          status: 'sending',
+          created_at: now,
+          updated_at: now,
+          conversation_id: id,
+          user_id: userId,
+          web_search_enabled: webSearchEnabled ? 'true' : undefined,
+        });
       },
 
       createMessage: async (
@@ -45,6 +60,7 @@ export function createMutators() {
           role,
           status,
           userId,
+          webSearchEnabled,
         }: {
           id: string;
           conversationId: string;
@@ -53,6 +69,7 @@ export function createMutators() {
           role: string;
           status: string;
           userId: string;
+          webSearchEnabled?: boolean;
         },
       ) => {
         const now = Date.now();
@@ -66,6 +83,7 @@ export function createMutators() {
           updated_at: now,
           conversation_id: conversationId,
           user_id: userId,
+          web_search_enabled: webSearchEnabled ? 'true' : undefined,
         });
       },
 

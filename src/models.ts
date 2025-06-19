@@ -1,7 +1,7 @@
 export const MODELS = {
   GPT_O3_MINI: {
     id: 'o3-mini',
-    name: 'GPT o3 mini',
+    name: 'GPT o3 mini (reasoning)',
     provider: 'OPENAI',
   },
   GPT_4O: {

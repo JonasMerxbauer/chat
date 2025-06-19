@@ -55,6 +55,7 @@ export async function streamAIResponse(
   responseId: string,
   content: string,
   model = DEFAULT_MODEL,
+  webSearchEnabled = false,
 ) {
   try {
     const isReasoningModel =
@@ -76,7 +77,13 @@ export async function streamAIResponse(
       const streamClient = await streamingPool.connect();
 
       try {
-        await handleTextGeneration(streamClient, responseId, content, model);
+        await handleTextGeneration(
+          streamClient,
+          responseId,
+          content,
+          model,
+          webSearchEnabled,
+        );
       } catch (error) {
         console.error(`AI processing error for ${responseId}:`, error);
 
@@ -106,8 +113,12 @@ async function handleTextGeneration(
   responseId: string,
   prompt: string,
   model: any,
+  webSearchEnabled = false,
 ) {
-  const { model: aiModel, providerOptions } = getProvider(model);
+  const { model: aiModel, ...otherOptions } = getProvider(
+    model,
+    webSearchEnabled,
+  );
 
   const isReasoningModel =
     model.provider === 'OPENAI' &&
@@ -133,7 +144,7 @@ async function handleTextGeneration(
   const streamOptions: any = {
     model: aiModel,
     messages: messages,
-    providerOptions,
+    ...otherOptions,
   };
 
   const { textStream } = streamText(streamOptions);
@@ -179,21 +190,32 @@ async function handleTextGeneration(
   );
 }
 
-const getProvider = (model: any) => {
+const getProvider = (model: any, webSearchEnabled = false) => {
   if (model.provider === 'OPENAI') {
     if (model.id === 'o3-mini') {
       return {
         model: openai(model.id),
         providerOptions: { openai: { reasoningEffort: 'low' } },
       };
+    }
+    if (webSearchEnabled && model.id === 'gpt-4o') {
+      return {
+        model: openai.responses(model.id),
+        tools: {
+          web_search_preview: openai.tools.webSearchPreview({
+            searchContextSize: 'high',
+          }),
+        },
+        toolChoice: { type: 'tool', toolName: 'web_search_preview' },
+      };
     } else {
-      return { model: openai(model.id), providerOptions: {} };
+      return { model: openai(model.id) };
     }
   } else if (model.provider === 'GOOGLE') {
-    return { model: google(model.id), providerOptions: {} };
+    return { model: google(model.id) };
   } else if (model.provider === 'ANTHROPIC') {
-    return { model: anthropic(model.id), providerOptions: {} };
+    return { model: anthropic(model.id) };
   }
 
-  return { model: google(DEFAULT_MODEL.id), providerOptions: {} };
+  return { model: google(DEFAULT_MODEL.id) };
 };

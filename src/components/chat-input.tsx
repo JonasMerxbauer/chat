@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { SendIcon } from 'lucide-react';
+import { SendIcon, Globe } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
@@ -42,6 +42,9 @@ export const ChatInput = ({
     name: string;
   }>(DEFAULT_MODEL);
 
+  // Local state for web search toggle
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
+
   const currentModel = conversation
     ? {
         id: conversation.current_model_id,
@@ -70,6 +73,7 @@ export const ChatInput = ({
         role: 'user',
         status: MESSAGE_STATUSES.SENDING,
         userId,
+        webSearchEnabled,
       });
 
       setTimeout(() => {
@@ -91,6 +95,7 @@ export const ChatInput = ({
         content: message,
         model: currentModel,
         userId,
+        webSearchEnabled,
       });
 
       navigate({
@@ -154,6 +159,18 @@ export const ChatInput = ({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Web Search Toggle - Only show for OpenAI models */}
+            {currentModel.id === 'gpt-4o' && (
+              <Button
+                variant={webSearchEnabled ? 'default' : 'neutral'}
+                onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+                className="flex items-center gap-2"
+              >
+                <Globe className="h-4 w-4" />
+                Web Search
+              </Button>
+            )}
           </div>
 
           <Button
@@ -175,6 +192,7 @@ export const Message = ({ message }: { message: any }) => {
   const role = message.role;
   const content = message.content;
   const status = message.status;
+  const webSearchEnabled = message.web_search_enabled === 'true';
 
   const getStatusText = () => {
     if (role !== 'assistant') return null;
@@ -209,17 +227,25 @@ export const Message = ({ message }: { message: any }) => {
             status === MESSAGE_STATUSES.REASONING ||
             status === MESSAGE_STATUSES.STREAMING) && (
             <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
-              {status === MESSAGE_STATUSES.REASONING ||
-                (status === MESSAGE_STATUSES.PENDING && (
-                  <div className="flex gap-1">
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400"></div>
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:0.1s]"></div>
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:0.2s]"></div>
-                  </div>
-                ))}
+              {(status === MESSAGE_STATUSES.REASONING ||
+                status === MESSAGE_STATUSES.PENDING) && (
+                <div className="flex gap-1">
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:0.1s]"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:0.2s]"></div>
+                </div>
+              )}
               <span>{getStatusText()}</span>
             </div>
           )}
+
+        {/* Web search indicator for user messages */}
+        {role === 'user' && webSearchEnabled && (
+          <div className="mb-2 flex items-center gap-1 text-xs opacity-70">
+            <Globe className="h-3 w-3" />
+            <span>Web search enabled</span>
+          </div>
+        )}
 
         {/* Message content */}
         {role === 'assistant' ? (
