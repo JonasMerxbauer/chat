@@ -6,7 +6,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { SendIcon, Globe, X, Loader2, File, Image } from 'lucide-react';
+import {
+  SendIcon,
+  Globe,
+  X,
+  Loader2,
+  File,
+  Image,
+  Copy,
+  Check,
+} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
@@ -427,6 +436,7 @@ export const Message = ({ message }: { message: any }) => {
   const content = message.content;
   const status = message.status;
   const webSearchEnabled = message.web_search_enabled === 'true';
+  const [copied, setCopied] = useState(false);
 
   // Parse attachments if they exist
   let attachments: Array<{
@@ -457,6 +467,26 @@ export const Message = ({ message }: { message: any }) => {
         return null;
     }
   };
+
+  const copyToClipboard = async () => {
+    if (!content) return;
+
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const isStreamingComplete =
+    role === 'assistant' &&
+    status !== MESSAGE_STATUSES.PENDING &&
+    status !== MESSAGE_STATUSES.REASONING &&
+    status !== MESSAGE_STATUSES.STREAMING &&
+    content &&
+    content.trim();
 
   return (
     <div
@@ -522,6 +552,30 @@ export const Message = ({ message }: { message: any }) => {
                   <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:0.2s]"></div>
                 </div>
               )}
+
+            {/* Copy button - show when streaming is complete */}
+            {isStreamingComplete && (
+              <div className="mt-2 flex justify-end">
+                <Button
+                  size="sm"
+                  variant="neutral"
+                  onClick={copyToClipboard}
+                  className="h-8 px-2 text-xs opacity-70 transition-opacity hover:opacity-100"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="mr-1 h-3 w-3" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-1 h-3 w-3" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
