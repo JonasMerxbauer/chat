@@ -57,8 +57,15 @@ export const ChatInput = ({
 
   const lastScrolledMessageId = useRef<string | null>(null);
 
+  const userHasScrolled = useRef<boolean>(false);
+  const isAutoScrolling = useRef<boolean>(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
   const isAtBottom = useCallback((container: Element) => {
     const threshold = 10;
+    if (container.scrollHeight <= container.clientHeight) {
+      return true;
+    }
     return (
       container.scrollTop >=
       container.scrollHeight - container.clientHeight - threshold
@@ -71,12 +78,21 @@ export const ChatInput = ({
         return;
       }
 
+      if (userHasScrolled.current) {
+        return;
+      }
+
       const messagesContainer = document.querySelector(
         '[data-messages-container]',
       );
       if (messagesContainer && !isAtBottom(messagesContainer)) {
+        isAutoScrolling.current = true;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         lastScrolledMessageId.current = messageId;
+
+        setTimeout(() => {
+          isAutoScrolling.current = false;
+        }, 100);
       }
     },
     [isAtBottom],
@@ -84,11 +100,46 @@ export const ChatInput = ({
 
   const resetScrollTracking = useCallback(() => {
     lastScrolledMessageId.current = null;
+    userHasScrolled.current = false;
   }, []);
 
   useEffect(() => {
     resetScrollTracking();
   }, [conversationId, resetScrollTracking]);
+
+  useEffect(() => {
+    const messagesContainer = document.querySelector(
+      '[data-messages-container]',
+    );
+    if (!messagesContainer) return;
+
+    const handleScroll = () => {
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+
+      if (!isAutoScrolling.current) {
+        scrollTimeout.current = setTimeout(() => {
+          userHasScrolled.current = true;
+
+          if (isAtBottom(messagesContainer)) {
+            userHasScrolled.current = false;
+          }
+        }, 150);
+      }
+    };
+
+    messagesContainer.addEventListener('scroll', handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      messagesContainer.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+    };
+  }, [isAtBottom]);
 
   const currentModel = conversation
     ? {
