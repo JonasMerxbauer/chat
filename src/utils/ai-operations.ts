@@ -53,9 +53,9 @@ export async function generateConversationTitle(
 
 export async function streamAIResponse(
   responseId: string,
-  content: string,
   model = DEFAULT_MODEL,
   webSearchEnabled = false,
+  conversationId?: string,
 ) {
   try {
     const isReasoningModel =
@@ -80,9 +80,9 @@ export async function streamAIResponse(
         await handleTextGeneration(
           streamClient,
           responseId,
-          content,
           model,
           webSearchEnabled,
+          conversationId,
         );
       } catch (error) {
         console.error(`AI processing error for ${responseId}:`, error);
@@ -111,9 +111,9 @@ export async function streamAIResponse(
 async function handleTextGeneration(
   client: any,
   responseId: string,
-  prompt: string,
   model: any,
   webSearchEnabled = false,
+  conversationId?: string,
 ) {
   const { model: aiModel, ...otherOptions } = getProvider(
     model,
@@ -136,10 +136,31 @@ async function handleTextGeneration(
     });
   }
 
-  messages.push({
-    role: 'user',
-    content: prompt,
-  });
+  // Fetch conversation history if conversationId is provided
+  if (conversationId) {
+    try {
+      const conversationMessages = await client.query(
+        'SELECT id, content, role, created_at FROM message WHERE conversation_id = $1 AND role IN ($2, $3) AND content IS NOT NULL AND content != $4 ORDER BY created_at ASC',
+        [conversationId, 'user', 'assistant', ''],
+      );
+
+      // Add all previous messages except the current one being processed
+      console.log(
+        `Loading ${conversationMessages.rows.length} previous messages for conversation ${conversationId}`,
+      );
+      for (const msg of conversationMessages.rows) {
+        if (msg.role === 'user' || msg.role === 'assistant') {
+          messages.push({
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching conversation history:', error);
+      // Fall back to just the current prompt if history fetch fails
+    }
+  }
 
   const streamOptions: any = {
     model: aiModel,

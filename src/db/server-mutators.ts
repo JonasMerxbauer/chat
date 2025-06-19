@@ -72,12 +72,7 @@ export function createMutators() {
         // Trigger AI streaming (fire and forget)
         (async () => {
           try {
-            await streamAIResponse(
-              responseId,
-              content,
-              model,
-              webSearchEnabled,
-            );
+            await streamAIResponse(responseId, model, webSearchEnabled, id);
           } catch (error) {
             console.error('Failed to trigger streaming:', error);
           }
@@ -136,9 +131,9 @@ export function createMutators() {
           try {
             await streamAIResponse(
               responseId,
-              content,
               model,
               webSearchEnabled,
+              conversationId,
             );
           } catch (error) {
             console.error('Failed to trigger streaming:', error);
