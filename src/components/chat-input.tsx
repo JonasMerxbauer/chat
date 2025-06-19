@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { SendIcon, Globe } from 'lucide-react';
+import { SendIcon, Globe, X, Loader2, File, Image } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
@@ -17,6 +17,7 @@ import { DEFAULT_MODEL, getAllModels, MESSAGE_STATUSES } from '~/models';
 import { useSession } from '~/lib/zero-auth';
 import { useZero } from '~/hooks/use-zero';
 import { cn } from '~/lib/utils';
+import { UploadButton } from './uploadthing';
 
 export const ChatInput = ({
   conversation,
@@ -44,6 +45,18 @@ export const ChatInput = ({
 
   // Local state for web search toggle
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
+
+  // State for uploaded files
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Array<{
+      id: string;
+      name: string;
+      url: string;
+      type: string;
+      size?: number;
+      isLoading: boolean;
+    }>
+  >([]);
 
   const currentModel = conversation
     ? {
@@ -74,7 +87,18 @@ export const ChatInput = ({
         status: MESSAGE_STATUSES.SENDING,
         userId,
         webSearchEnabled,
+        attachments: uploadedFiles
+          .filter((f) => !f.isLoading)
+          .map((f) => ({
+            url: f.url,
+            name: f.name,
+            type: f.type,
+            size: f.size,
+          })),
       });
+
+      // Clear uploaded files after sending
+      setUploadedFiles([]);
 
       setTimeout(() => {
         const messagesContainer = document.querySelector(
@@ -96,7 +120,18 @@ export const ChatInput = ({
         model: currentModel,
         userId,
         webSearchEnabled,
+        attachments: uploadedFiles
+          .filter((f) => !f.isLoading)
+          .map((f) => ({
+            url: f.url,
+            name: f.name,
+            type: f.type,
+            size: f.size,
+          })),
       });
+
+      // Clear uploaded files after sending
+      setUploadedFiles([]);
 
       navigate({
         to: '/$chatId',
@@ -107,21 +142,75 @@ export const ChatInput = ({
     }
   };
 
+  const removeFile = (id: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
+  };
+
+  const isImageFile = (type: string) => {
+    return type.startsWith('image/');
+  };
+
+  const getFileIcon = (type: string) => {
+    if (isImageFile(type)) {
+      return <Image className="h-4 w-4" />;
+    } else {
+      return <File className="h-4 w-4" />;
+    }
+  };
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   return (
     <div className="mx-auto w-full max-w-[800px]">
       <div className="rounded-base border-border bg-secondary-background mx-4 flex w-auto flex-col border-2 p-2 focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-2 focus-within:outline-none">
+        {uploadedFiles.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {uploadedFiles.map((file) => (
+              <div key={file.id} className="relative">
+                {file.isLoading ? (
+                  <div className="bg-muted flex items-center gap-2 rounded-md p-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-muted-foreground text-sm">
+                      {file.name}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="group relative">
+                    {isImageFile(file.type) ? (
+                      <img
+                        src={file.url}
+                        alt={file.name}
+                        className="h-10 w-10 rounded-md object-cover"
+                      />
+                    ) : (
+                      <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-md border">
+                        {getFileIcon(file.type)}
+                      </div>
+                    )}
+                    <Button
+                      size="icon"
+                      onClick={() => removeFile(file.id)}
+                      className="bg-main text-destructive-foreground absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="flex-1">
           <textarea
             data-slot="textarea"
             ref={inputRef}
-            className="font-base text-foreground placeholder:text-foreground/50 selection:bg-main selection:text-main-foreground flex min-h-[80px] w-full resize-none px-3 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="font-base text-foreground placeholder:text-foreground/50 selection:bg-main selection:text-main-foreground flex min-h-[80px] w-full resize-none p-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 const message = inputRef.current?.value ?? '';
-                if (message.trim()) {
+                if (message.trim() || uploadedFiles.some((f) => !f.isLoading)) {
                   handleSendMessage(message);
                   inputRef.current!.value = '';
                 }
@@ -171,12 +260,85 @@ export const ChatInput = ({
                 Web Search
               </Button>
             )}
+            <UploadButton
+              endpoint="fileUploader"
+              className="upload-button-custom"
+              onUploadBegin={(name) => {
+                const fileId = crypto.randomUUID();
+                setUploadedFiles((prev) => [
+                  ...prev,
+                  {
+                    id: fileId,
+                    name: name,
+                    url: '',
+                    type: '',
+                    isLoading: true,
+                  },
+                ]);
+              }}
+              onClientUploadComplete={(res) => {
+                // Update the loading file with the actual URL
+                if (res && res.length > 0) {
+                  const uploadedFile = res[0];
+                  setUploadedFiles((prev) =>
+                    prev.map((file) =>
+                      file.isLoading && file.name === uploadedFile.name
+                        ? {
+                            ...file,
+                            url: uploadedFile.url,
+                            type: uploadedFile.type || '',
+                            size: uploadedFile.size,
+                            isLoading: false,
+                          }
+                        : file,
+                    ),
+                  );
+                }
+              }}
+              onUploadError={(error) => {
+                console.error('Upload error:', error);
+                // Remove the failed upload from state
+                setUploadedFiles((prev) =>
+                  prev.filter((file) => !file.isLoading),
+                );
+              }}
+              appearance={{
+                button: () => ({
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  gap: '8px',
+                  outline: 'none',
+                  pointerEvents: 'auto',
+                  backgroundColor: 'oklch(67.47% 0.1726 259.49)',
+                  color: 'oklch(0% 0 0)',
+                  border: '2px solid oklch(0% 0 0)',
+                  boxShadow: '0px 2px 0px 0px oklch(0% 0 0)',
+                  height: '40px',
+                  padding: '8px 16px',
+                }),
+                container: 'flex',
+                allowedContent: 'hidden',
+              }}
+              content={{
+                button: 'Attach images',
+              }}
+            />
           </div>
 
           <Button
             onClick={() => {
-              handleSendMessage(inputRef.current?.value ?? '');
-              inputRef.current!.value = '';
+              const message = inputRef.current?.value ?? '';
+              if (message.trim() || uploadedFiles.some((f) => !f.isLoading)) {
+                handleSendMessage(message);
+                inputRef.current!.value = '';
+              }
             }}
           >
             <SendIcon />
@@ -193,6 +355,21 @@ export const Message = ({ message }: { message: any }) => {
   const content = message.content;
   const status = message.status;
   const webSearchEnabled = message.web_search_enabled === 'true';
+
+  // Parse attachments if they exist
+  let attachments: Array<{
+    url: string;
+    name: string;
+    type: string;
+    size?: number;
+  }> = [];
+  if (message.attachments) {
+    try {
+      attachments = JSON.parse(message.attachments);
+    } catch (error) {
+      console.error('Error parsing message attachments:', error);
+    }
+  }
 
   const getStatusText = () => {
     if (role !== 'assistant') return null;
@@ -275,7 +452,25 @@ export const Message = ({ message }: { message: any }) => {
               )}
           </div>
         ) : (
-          <div className="w500:text-sm">{content}</div>
+          <div className="space-y-2">
+            {/* Show attachments for user messages */}
+            {attachments.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-2">
+                {attachments.map((attachment, index) => (
+                  <div key={index} className="relative">
+                    {attachment.type && attachment.type.startsWith('image/') ? (
+                      <img
+                        src={attachment.url}
+                        alt={attachment.name}
+                        className="h-20 w-20 rounded-md border border-white/20 object-cover"
+                      />
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="w500:text-sm">{content}</div>
+          </div>
         )}
       </div>
     </div>

@@ -14,6 +14,7 @@ export function createMutators() {
           title,
           userId,
           webSearchEnabled,
+          attachments,
         }: {
           id: string;
           messageId: string;
@@ -22,6 +23,12 @@ export function createMutators() {
           title: string;
           userId: string;
           webSearchEnabled?: boolean;
+          attachments?: Array<{
+            url: string;
+            name: string;
+            type: string;
+            size?: number;
+          }>;
         },
       ) => {
         const now = Date.now();
@@ -47,6 +54,10 @@ export function createMutators() {
           conversation_id: id,
           user_id: userId,
           web_search_enabled: webSearchEnabled ? 'true' : undefined,
+          attachments:
+            attachments && attachments.length > 0
+              ? JSON.stringify(attachments)
+              : undefined,
         });
       },
 
@@ -61,6 +72,7 @@ export function createMutators() {
           status,
           userId,
           webSearchEnabled,
+          attachments,
         }: {
           id: string;
           conversationId: string;
@@ -70,6 +82,12 @@ export function createMutators() {
           status: string;
           userId: string;
           webSearchEnabled?: boolean;
+          attachments?: Array<{
+            url: string;
+            name: string;
+            type: string;
+            size?: number;
+          }>;
         },
       ) => {
         const now = Date.now();
@@ -84,6 +102,10 @@ export function createMutators() {
           conversation_id: conversationId,
           user_id: userId,
           web_search_enabled: webSearchEnabled ? 'true' : undefined,
+          attachments:
+            attachments && attachments.length > 0
+              ? JSON.stringify(attachments)
+              : undefined,
         });
       },
 

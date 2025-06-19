@@ -136,24 +136,66 @@ async function handleTextGeneration(
     });
   }
 
-  // Fetch conversation history if conversationId is provided
   if (conversationId) {
     try {
       const conversationMessages = await client.query(
-        'SELECT id, content, role, created_at FROM message WHERE conversation_id = $1 AND role IN ($2, $3) AND content IS NOT NULL AND content != $4 ORDER BY created_at ASC',
+        'SELECT id, content, role, created_at, attachments FROM message WHERE conversation_id = $1 AND role IN ($2, $3) AND content IS NOT NULL AND content != $4 ORDER BY created_at ASC',
         [conversationId, 'user', 'assistant', ''],
       );
 
-      // Add all previous messages except the current one being processed
       console.log(
         `Loading ${conversationMessages.rows.length} previous messages for conversation ${conversationId}`,
       );
       for (const msg of conversationMessages.rows) {
         if (msg.role === 'user' || msg.role === 'assistant') {
-          messages.push({
+          const messageContent: any = {
             role: msg.role as 'user' | 'assistant',
-            content: msg.content,
-          });
+          };
+
+          // Handle attachments for user messages
+          if (msg.role === 'user' && msg.attachments) {
+            try {
+              const messageAttachments = JSON.parse(msg.attachments);
+              if (messageAttachments && messageAttachments.length > 0) {
+                // Process images only
+                const imageAttachments = messageAttachments.filter(
+                  (attachment: { url: string; name: string; type: string }) =>
+                    attachment.type && attachment.type.startsWith('image/'),
+                );
+
+                // Build content array
+                const contentParts = [];
+
+                // Add text content
+                contentParts.push({ type: 'text', text: msg.content });
+
+                // Add image attachments (supported by all vision models)
+                imageAttachments.forEach(
+                  (attachment: { url: string; name: string; type: string }) => {
+                    contentParts.push({
+                      type: 'image',
+                      image: attachment.url,
+                    });
+                  },
+                );
+
+                if (contentParts.length > 1) {
+                  messageContent.content = contentParts;
+                } else {
+                  messageContent.content = msg.content;
+                }
+              } else {
+                messageContent.content = msg.content;
+              }
+            } catch (error) {
+              console.error('Error parsing attachments:', error);
+              messageContent.content = msg.content;
+            }
+          } else {
+            messageContent.content = msg.content;
+          }
+
+          messages.push(messageContent);
         }
       }
     } catch (error) {

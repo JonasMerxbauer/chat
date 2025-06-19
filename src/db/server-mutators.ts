@@ -24,6 +24,7 @@ export function createMutators() {
           model,
           userId,
           webSearchEnabled,
+          attachments,
         }: {
           id: string;
           title: string;
@@ -32,6 +33,12 @@ export function createMutators() {
           model: any;
           userId: string;
           webSearchEnabled?: boolean;
+          attachments?: Array<{
+            url: string;
+            name: string;
+            type: string;
+            size?: number;
+          }>;
         },
       ) => {
         // First, create the conversation record using client mutator
@@ -43,6 +50,7 @@ export function createMutators() {
           userId,
           model,
           webSearchEnabled,
+          attachments,
         });
 
         // Note: The initial message is already created by the client mutator above
@@ -90,6 +98,7 @@ export function createMutators() {
           model,
           userId,
           webSearchEnabled,
+          attachments,
         }: {
           id: string;
           conversationId: string;
@@ -99,6 +108,12 @@ export function createMutators() {
           model: any;
           userId: string;
           webSearchEnabled?: boolean;
+          attachments?: Array<{
+            url: string;
+            name: string;
+            type: string;
+            size?: number;
+          }>;
         },
       ) => {
         // Create user message
@@ -111,6 +126,7 @@ export function createMutators() {
           status: MESSAGE_STATUSES.COMPLETE,
           userId,
           webSearchEnabled,
+          attachments,
         });
 
         const responseId = crypto.randomUUID();

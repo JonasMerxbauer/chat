@@ -17,6 +17,7 @@ const message = table('message')
     updated_at: number(),
     user_id: string(),
     web_search_enabled: string().optional(), // 'true' | 'false' | null
+    attachments: string().optional(), // JSON string of attachment objects
   })
   .primaryKey('id');
 
