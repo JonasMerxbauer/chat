@@ -55,91 +55,34 @@ export const ChatInput = ({
     }>
   >([]);
 
-  const lastScrolledMessageId = useRef<string | null>(null);
+  // Track the last user message to trigger scroll only when it changes
+  const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(
+    null,
+  );
 
-  const userHasScrolled = useRef<boolean>(false);
-  const isAutoScrolling = useRef<boolean>(false);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  const isAtBottom = useCallback((container: Element) => {
-    const threshold = 10;
-    if (container.scrollHeight <= container.clientHeight) {
-      return true;
-    }
-    return (
-      container.scrollTop >=
-      container.scrollHeight - container.clientHeight - threshold
-    );
-  }, []);
-
-  const scrollToBottomIfNeeded = useCallback(
-    (messageId: string) => {
-      if (lastScrolledMessageId.current === messageId) {
-        return;
-      }
-
-      if (userHasScrolled.current) {
-        return;
-      }
-
+  // Simple scroll to bottom function
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
       const messagesContainer = document.querySelector(
         '[data-messages-container]',
       );
-      if (messagesContainer && !isAtBottom(messagesContainer)) {
-        isAutoScrolling.current = true;
+      if (messagesContainer) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        lastScrolledMessageId.current = messageId;
-
-        setTimeout(() => {
-          isAutoScrolling.current = false;
-        }, 100);
       }
-    },
-    [isAtBottom],
-  );
-
-  const resetScrollTracking = useCallback(() => {
-    lastScrolledMessageId.current = null;
-    userHasScrolled.current = false;
+    }, 100);
   }, []);
 
+  // Scroll when last user message changes
   useEffect(() => {
-    resetScrollTracking();
-  }, [conversationId, resetScrollTracking]);
+    if (lastUserMessageId) {
+      scrollToBottom();
+    }
+  }, [lastUserMessageId, scrollToBottom]);
 
+  // Reset last user message when conversation changes
   useEffect(() => {
-    const messagesContainer = document.querySelector(
-      '[data-messages-container]',
-    );
-    if (!messagesContainer) return;
-
-    const handleScroll = () => {
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
-
-      if (!isAutoScrolling.current) {
-        scrollTimeout.current = setTimeout(() => {
-          userHasScrolled.current = true;
-
-          if (isAtBottom(messagesContainer)) {
-            userHasScrolled.current = false;
-          }
-        }, 150);
-      }
-    };
-
-    messagesContainer.addEventListener('scroll', handleScroll, {
-      passive: true,
-    });
-
-    return () => {
-      messagesContainer.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
-    };
-  }, [isAtBottom]);
+    setLastUserMessageId(null);
+  }, [conversationId]);
 
   const currentModel = conversation
     ? {
@@ -185,9 +128,8 @@ export const ChatInput = ({
 
       setUploadedFiles([]);
 
-      setTimeout(() => {
-        scrollToBottomIfNeeded(messageId);
-      }, 100);
+      // Trigger scroll by updating the last user message ID
+      setLastUserMessageId(messageId);
     } else {
       const conversationId = crypto.randomUUID();
       const messageId = crypto.randomUUID();
@@ -219,9 +161,10 @@ export const ChatInput = ({
         },
       });
 
+      // Trigger scroll by updating the last user message ID after navigation
       setTimeout(() => {
-        scrollToBottomIfNeeded(messageId);
-      }, 200);
+        setLastUserMessageId(messageId);
+      }, 200); // Wait for navigation to complete
     }
   };
 

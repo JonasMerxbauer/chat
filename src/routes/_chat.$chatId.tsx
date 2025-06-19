@@ -36,37 +36,37 @@ export default function Page() {
     }
   }, [messages.length, messages[messages.length - 1]?.content]);
 
+  // Consolidated function to check if user is at bottom
+  const checkIfAtBottom = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const threshold = 10; // Reduced threshold for more accurate detection
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - threshold;
+    setShowScrollToBottom(!isAtBottom);
+  };
+
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
-      setShowScrollToBottom(!isAtBottom);
+      checkIfAtBottom();
     };
 
-    const checkInitialScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
-      setShowScrollToBottom(!isAtBottom);
-    };
+    container.addEventListener('scroll', handleScroll, { passive: true });
 
-    container.addEventListener('scroll', handleScroll);
-
-    setTimeout(checkInitialScroll, 100);
+    // Initial check with a small delay for DOM updates
+    setTimeout(checkIfAtBottom, 150);
 
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
-    setShowScrollToBottom(!isAtBottom);
-  }, [messages.length]);
+    // Check scroll position when messages change, with delay for DOM updates
+    setTimeout(checkIfAtBottom, 200);
+  }, [messages.length, messages[messages.length - 1]?.content]);
 
   const scrollToBottom = () => {
     const container = messagesContainerRef.current;
