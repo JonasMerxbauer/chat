@@ -26,6 +26,9 @@ const conversation = table('conversation')
     created_at: number(),
     updated_at: number(),
     user_id: string(),
+    current_model_id: string(),
+    current_model_provider: string(),
+    current_model_name: string(),
   })
   .primaryKey('id');
 

@@ -18,21 +18,37 @@ import { useSession } from '~/lib/zero-auth';
 import { useZero } from '~/hooks/use-zero';
 import { cn } from '~/lib/utils';
 
-export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
+export const ChatInput = ({
+  conversation,
+  ...props
+}: React.ComponentProps<'textarea'> & {
+  conversation?: {
+    id: string;
+    current_model_id: string;
+    current_model_provider: string;
+    current_model_name: string;
+  };
+}) => {
   const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
   const navigate = useNavigate();
   const z = useZero();
-  const [selectedModel, setSelectedModel] = useState<{
+
+  const conversationId = params?.chatId ?? '';
+
+  // Local state for model selection when no conversation exists
+  const [localSelectedModel, setLocalSelectedModel] = useState<{
     id: string;
     provider: string;
     name: string;
-  }>({
-    id: DEFAULT_MODEL.id,
-    provider: DEFAULT_MODEL.provider,
-    name: DEFAULT_MODEL.name,
-  });
+  }>(DEFAULT_MODEL);
 
-  const conversationId = params?.chatId ?? '';
+  const currentModel = conversation
+    ? {
+        id: conversation.current_model_id,
+        provider: conversation.current_model_provider,
+        name: conversation.current_model_name,
+      }
+    : localSelectedModel;
 
   const { data: session } = useSession();
 
@@ -50,7 +66,7 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
         id: messageId,
         conversationId: conversationId,
         content: message,
-        model: selectedModel,
+        model: currentModel,
         role: 'user',
         status: MESSAGE_STATUSES.SENDING,
         userId,
@@ -73,7 +89,7 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
         title: 'New chat',
         messageId,
         content: message,
-        model: selectedModel,
+        model: currentModel,
         userId,
       });
 
@@ -114,14 +130,23 @@ export const ChatInput = ({ ...props }: React.ComponentProps<'textarea'>) => {
           <div className="flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>{selectedModel.name}</Button>
+                <Button>{currentModel.name}</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {getAllModels().map((model) => (
                   <DropdownMenuItem
                     key={model.id}
                     onClick={() => {
-                      setSelectedModel(model);
+                      if (conversationId) {
+                        // Update existing conversation's model
+                        z.mutate.conversation.updateConversationModel({
+                          id: conversationId,
+                          model,
+                        });
+                      } else {
+                        // Update local state for new conversation
+                        setLocalSelectedModel(model);
+                      }
                     }}
                   >
                     {model.name}

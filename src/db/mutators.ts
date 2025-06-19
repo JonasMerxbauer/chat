@@ -29,6 +29,9 @@ export function createMutators() {
           created_at: now,
           updated_at: now,
           user_id: userId,
+          current_model_id: model.id,
+          current_model_provider: model.provider,
+          current_model_name: model.name,
         });
       },
 
@@ -101,6 +104,30 @@ export function createMutators() {
           id,
           content,
           status,
+          updated_at: now,
+        });
+      },
+
+      updateConversationModel: async (
+        tx,
+        {
+          id,
+          model,
+        }: {
+          id: string;
+          model: {
+            id: string;
+            provider: string;
+            name: string;
+          };
+        },
+      ) => {
+        const now = Date.now();
+        await tx.mutate.conversation.update({
+          id,
+          current_model_id: model.id,
+          current_model_provider: model.provider,
+          current_model_name: model.name,
           updated_at: now,
         });
       },
