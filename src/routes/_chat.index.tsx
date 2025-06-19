@@ -117,7 +117,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="absolute bottom-5 w-full">
+      <div className="absolute bottom-5 left-1/2 w-full max-w-[800px] -translate-x-1/2">
         <ChatInput placeholder="Type your message here..." />
       </div>
     </div>
