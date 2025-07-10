@@ -1,4 +1,4 @@
-import { createAPIFileRoute } from '@tanstack/react-start/api';
+import { createServerFileRoute } from '@tanstack/react-start/server'
 import { createMutators } from '~/db/server-mutators';
 import { schema } from '~/db/schema';
 import {
@@ -13,7 +13,7 @@ const processor = new PushProcessor(
   new ZQLDatabase(new PostgresJSConnection(postgres(env.DATABASE_URL)), schema),
 );
 
-export const APIRoute = createAPIFileRoute('/api/push')({
+export const ServerRoute = createServerFileRoute('/api/push').methods({
   POST: async ({ request }) => {
     try {
       const result = await processor.process(createMutators(), request);

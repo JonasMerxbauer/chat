@@ -55,7 +55,6 @@ export const Route = createRootRoute({
       </RootDocument>
     </ZeroAuthProvider>
   ),
-  ssr: false,
 });
 
 const ZeroAuthProvider = ({ children }: { children: React.ReactNode }) => {

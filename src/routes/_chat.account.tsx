@@ -17,6 +17,7 @@ import { Trash2 } from 'lucide-react';
 
 export const Route = createFileRoute('/_chat/account')({
   component: RouteComponent,
+  ssr: false,
 });
 
 function RouteComponent() {

@@ -17,6 +17,7 @@ import { useMemo } from 'react';
 
 export const Route = createFileRoute('/_chat')({
   component: RouteComponent,
+  ssr: false,
 });
 
 function RouteComponent() {

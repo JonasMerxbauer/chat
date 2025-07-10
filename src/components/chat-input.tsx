@@ -39,7 +39,10 @@ export const ChatInput = ({
     current_model_name: string;
   };
 }) => {
-  const params = useParams({ from: '/_chat/$chatId', shouldThrow: false });
+  const params = useParams({
+    from: '/_chat/$chatId',
+    shouldThrow: false,
+  });
   const navigate = useNavigate();
   const z = useZero();
 

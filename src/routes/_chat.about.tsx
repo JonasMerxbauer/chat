@@ -10,6 +10,7 @@ import { ExternalLink, Github } from 'lucide-react';
 
 export const Route = createFileRoute('/_chat/about')({
   component: RouteComponent,
+  ssr: false,
 });
 
 function RouteComponent() {
