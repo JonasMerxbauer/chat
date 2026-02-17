@@ -1,27 +1,25 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@rocicorp/zero/react';
+import { useQuery as useZeroQuery } from '@rocicorp/zero/react';
 import { ChatInput, Message } from '~/components/chat-input';
-import { useZero, usePreloadSpecificChat } from '~/hooks/use-zero';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { ArrowDown } from 'lucide-react';
+import { queries } from '~/zero/queries';
 
-export const Route = createFileRoute('/_chat/$chatId')({
+export const Route = createFileRoute('/_layout/_chat/$chatId')({
   component: Page,
   ssr: false,
 });
 
 export default function Page() {
   const { chatId } = Route.useParams();
-  const z = useZero();
+  const { user } = Route.useRouteContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
-  usePreloadSpecificChat(chatId);
-
-  const [conversations, conversationsResult] = useQuery(
-    z.query.conversation.related('messages').where('id', '=', chatId),
+  const [conversations, conversationsResult] = useZeroQuery(
+    queries.conversation.byIdWithMessages({ id: chatId }),
   );
 
   const conversation = conversations[0];
@@ -138,6 +136,7 @@ export default function Page() {
       <div className="absolute bottom-5 left-1/2 w-full max-w-[800px] -translate-x-1/2">
         <ChatInput
           conversation={conversation}
+          user={user}
           placeholder="Type your message here..."
         />
       </div>

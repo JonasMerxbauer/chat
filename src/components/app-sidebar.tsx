@@ -1,6 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { signOut } from '~/auth';
-import { clearZeroData } from '~/lib/zero-auth';
+import { logout } from '~/auth/client';
 import { BadgeCheck, ChevronsUpDown, Info, LogOut, X } from 'lucide-react';
 
 import * as React from 'react';
@@ -27,7 +26,8 @@ import {
 } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
 import { Button } from './ui/button';
-import { useZero } from '~/hooks/use-zero';
+import { useZero } from '@rocicorp/zero/react';
+import { mutators } from '~/zero/mutators';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function AppSidebar({
@@ -47,11 +47,7 @@ export function AppSidebar({
 
   const handleSignOut = async () => {
     try {
-      // Clear Zero data first
-      await clearZeroData();
-
-      // Then sign out
-      await signOut();
+      await logout();
 
       // Navigate to home
       navigate({ to: '/' });
@@ -68,7 +64,9 @@ export function AppSidebar({
     e.stopPropagation();
 
     try {
-      z.mutate.conversation.deleteConversation({ id: conversationId });
+      z.mutate(
+        mutators.conversation.deleteConversation({ id: conversationId }),
+      );
 
       if (selectedConversation === conversationId) {
         navigate({ to: '/' });

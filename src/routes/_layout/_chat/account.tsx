@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/dialog';
 import { Trash2 } from 'lucide-react';
 
-export const Route = createFileRoute('/_chat/account')({
+export const Route = createFileRoute('/_layout/_chat/account')({
   component: RouteComponent,
   ssr: false,
 });

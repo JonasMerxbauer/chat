@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { ChatInput } from '~/components/chat-input';
 import { Card } from '~/components/ui/card';
-import { useSession } from '~/lib/zero-auth';
-import { useZero } from '~/hooks/use-zero';
+import { useZero } from '@rocicorp/zero/react';
+import { mutators } from '~/zero/mutators';
 import { DEFAULT_MODEL } from '~/models';
+import { createId } from '~/lib/utils';
 import { MessageSquare, Code, Lightbulb, HelpCircle } from 'lucide-react';
 
-export const Route = createFileRoute('/_chat/')({
+export const Route = createFileRoute('/_layout/_chat/')({
   component: Page,
   ssr: false,
 });
@@ -44,25 +45,30 @@ const EXAMPLE_PROMPTS = [
 export default function Page() {
   const navigate = useNavigate();
   const z = useZero();
-  const { data: session } = useSession();
-  const userId = session?.user?.id;
+  // Get user and subscription from route context (set in beforeLoad) - avoids extra API call
+  const { user } = Route.useRouteContext();
+  const userId = user?.id;
 
   const handleExampleClick = async (prompt: string) => {
     if (!userId) {
       return;
     }
 
-    const conversationId = crypto.randomUUID();
-    const messageId = crypto.randomUUID();
+    const conversationId = createId();
+    const messageId = createId();
+    const responseId = createId();
 
-    z.mutate.conversation.createConversation({
-      id: conversationId,
-      title: 'New chat',
-      messageId,
-      content: prompt,
-      model: DEFAULT_MODEL,
-      userId,
-    });
+    z.mutate(
+      mutators.conversation.createConversation({
+        id: conversationId,
+        title: 'New chat',
+        messageId,
+        responseId,
+        content: prompt,
+        model: DEFAULT_MODEL,
+        userId,
+      }),
+    );
 
     navigate({
       to: '/$chatId',
@@ -78,7 +84,7 @@ export default function Page() {
         <div className="w-full max-w-4xl">
           <div className="mb-12 text-center">
             <h1 className="mb-4 text-4xl font-bold">
-              Welcome, {session?.user?.name.split(' ')[0]}
+              Welcome, {user?.name?.split(' ')[0]}
             </h1>
             <p className="text-muted-foreground text-lg">
               Start a conversation or choose from these example prompts
@@ -118,7 +124,7 @@ export default function Page() {
       </div>
 
       <div className="absolute bottom-5 left-1/2 w-full max-w-[800px] -translate-x-1/2">
-        <ChatInput placeholder="Type your message here..." />
+        <ChatInput user={user} placeholder="Type your message here..." />
       </div>
     </div>
   );

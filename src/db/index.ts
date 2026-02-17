@@ -1,7 +1,5 @@
-// Zero instances are now managed by the auth context
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { env } from '~/env';
+import * as schema from './schema';
 
-// Export schema and mutators for use in the Zero auth context
-export { schema } from './schema';
-export { createMutators } from './mutators';
-export type { Schema } from './schema';
-export type { Mutators } from './mutators';
+export const db = drizzle(env.ZERO_UPSTREAM_DB, { schema });

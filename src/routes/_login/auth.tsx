@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { signIn, signUp, useSession } from '~/auth';
-import { refreshAuth } from '~/lib/zero-auth';
+import { authClient } from '~/auth/client';
 import { Button } from '~/components/ui/button';
 import {
   Card,
@@ -22,7 +21,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 
-export const Route = createFileRoute('/auth')({
+export const Route = createFileRoute('/_login/auth')({
   component: AuthPage,
   ssr: false,
 });
@@ -41,7 +40,7 @@ interface SignUpFormData {
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { data: session } = useSession();
+  const { queryClient } = Route.useRouteContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,27 +60,22 @@ function AuthPage() {
     },
   });
 
-  // Redirect if already authenticated
-  if (session?.user) {
-    navigate({ to: '/' });
-    return null;
-  }
-
   const onLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await signIn.email({
+      const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
       });
 
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'getSession'] });
+      await queryClient.refetchQueries({ queryKey: ['auth', 'getSession'] });
+
       if (result.error) {
         setError(result.error.message || 'Failed to sign in');
       } else {
-        // Refresh auth state to get JWT for Zero
-        await refreshAuth();
         navigate({ to: '/' });
       }
     } catch (err) {
@@ -104,17 +98,18 @@ function AuthPage() {
     setError(null);
 
     try {
-      const result = await signUp.email({
+      const result = await authClient.signUp.email({
         email: data.email,
         password: data.password,
         name: data.name,
       });
 
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'getSession'] });
+      await queryClient.refetchQueries({ queryKey: ['auth', 'getSession'] });
+
       if (result.error) {
         setError(result.error.message || 'Failed to create account');
       } else {
-        // Refresh auth state to get JWT for Zero
-        await refreshAuth();
         navigate({ to: '/' });
       }
     } catch (err) {
@@ -129,10 +124,13 @@ function AuthPage() {
     setError(null);
 
     try {
-      await signIn.social({
+      await authClient.signIn.social({
         provider: 'github',
         callbackURL: '/',
       });
+
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'getSession'] });
+      await queryClient.refetchQueries({ queryKey: ['auth', 'getSession'] });
     } catch (err) {
       setError('Failed to sign in with GitHub');
       setIsLoading(false);
@@ -144,10 +142,13 @@ function AuthPage() {
     setError(null);
 
     try {
-      await signIn.social({
+      await authClient.signIn.social({
         provider: 'discord',
         callbackURL: '/',
       });
+
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'getSession'] });
+      await queryClient.refetchQueries({ queryKey: ['auth', 'getSession'] });
     } catch (err) {
       setError('Failed to sign in with Discord');
       setIsLoading(false);
@@ -418,5 +419,5 @@ function AuthPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

@@ -8,238 +8,311 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createServerRootRoute } from '@tanstack/react-start/server'
-
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ChatRouteImport } from './routes/_chat'
-import { Route as ChatIndexRouteImport } from './routes/_chat.index'
-import { Route as ChatAccountRouteImport } from './routes/_chat.account'
-import { Route as ChatAboutRouteImport } from './routes/_chat.about'
-import { Route as ChatChatIdRouteImport } from './routes/_chat.$chatId'
-import { ServerRoute as ApiUploadthingServerRouteImport } from './routes/api.uploadthing'
-import { ServerRoute as ApiPushServerRouteImport } from './routes/api.push'
-import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api.auth.$'
+import { Route as LoginRouteRouteImport } from './routes/_login/route'
+import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
+import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as LoginAuthRouteImport } from './routes/_login/auth'
+import { Route as LayoutChatRouteRouteImport } from './routes/_layout/_chat/route'
+import { Route as LayoutChatIndexRouteImport } from './routes/_layout/_chat/index'
+import { Route as ApiZeroQueryRouteImport } from './routes/api/zero/query'
+import { Route as ApiZeroMutateRouteImport } from './routes/api/zero/mutate'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as LayoutChatAccountRouteImport } from './routes/_layout/_chat/account'
+import { Route as LayoutChatAboutRouteImport } from './routes/_layout/_chat/about'
+import { Route as LayoutChatChatIdRouteImport } from './routes/_layout/_chat/$chatId'
 
-const rootServerRouteImport = createServerRootRoute()
-
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const LoginRouteRoute = LoginRouteRouteImport.update({
+  id: '/_login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/_chat',
+const LayoutRouteRoute = LayoutRouteRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatIndexRoute = ChatIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ChatRoute,
-} as any)
-const ChatAccountRoute = ChatAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => ChatRoute,
-} as any)
-const ChatAboutRoute = ChatAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => ChatRoute,
-} as any)
-const ChatChatIdRoute = ChatChatIdRouteImport.update({
-  id: '/$chatId',
-  path: '/$chatId',
-  getParentRoute: () => ChatRoute,
-} as any)
-const ApiUploadthingServerRoute = ApiUploadthingServerRouteImport.update({
+const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   id: '/api/uploadthing',
   path: '/api/uploadthing',
-  getParentRoute: () => rootServerRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPushServerRoute = ApiPushServerRouteImport.update({
-  id: '/api/push',
-  path: '/api/push',
-  getParentRoute: () => rootServerRouteImport,
+const LoginAuthRoute = LoginAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => LoginRouteRoute,
 } as any)
-const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
+const LayoutChatRouteRoute = LayoutChatRouteRouteImport.update({
+  id: '/_chat',
+  getParentRoute: () => LayoutRouteRoute,
+} as any)
+const LayoutChatIndexRoute = LayoutChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutChatRouteRoute,
+} as any)
+const ApiZeroQueryRoute = ApiZeroQueryRouteImport.update({
+  id: '/api/zero/query',
+  path: '/api/zero/query',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiZeroMutateRoute = ApiZeroMutateRouteImport.update({
+  id: '/api/zero/mutate',
+  path: '/api/zero/mutate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
-  getParentRoute: () => rootServerRouteImport,
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LayoutChatAccountRoute = LayoutChatAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => LayoutChatRouteRoute,
+} as any)
+const LayoutChatAboutRoute = LayoutChatAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LayoutChatRouteRoute,
+} as any)
+const LayoutChatChatIdRoute = LayoutChatChatIdRouteImport.update({
+  id: '/$chatId',
+  path: '/$chatId',
+  getParentRoute: () => LayoutChatRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/auth': typeof AuthRoute
-  '/$chatId': typeof ChatChatIdRoute
-  '/about': typeof ChatAboutRoute
-  '/account': typeof ChatAccountRoute
-  '/': typeof ChatIndexRoute
+  '/': typeof LayoutChatIndexRoute
+  '/auth': typeof LoginAuthRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
+  '/$chatId': typeof LayoutChatChatIdRoute
+  '/about': typeof LayoutChatAboutRoute
+  '/account': typeof LayoutChatAccountRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/zero/mutate': typeof ApiZeroMutateRoute
+  '/api/zero/query': typeof ApiZeroQueryRoute
 }
 export interface FileRoutesByTo {
-  '/auth': typeof AuthRoute
-  '/$chatId': typeof ChatChatIdRoute
-  '/about': typeof ChatAboutRoute
-  '/account': typeof ChatAccountRoute
-  '/': typeof ChatIndexRoute
+  '/': typeof LayoutChatIndexRoute
+  '/auth': typeof LoginAuthRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
+  '/$chatId': typeof LayoutChatChatIdRoute
+  '/about': typeof LayoutChatAboutRoute
+  '/account': typeof LayoutChatAccountRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/zero/mutate': typeof ApiZeroMutateRoute
+  '/api/zero/query': typeof ApiZeroQueryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_chat': typeof ChatRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/_chat/$chatId': typeof ChatChatIdRoute
-  '/_chat/about': typeof ChatAboutRoute
-  '/_chat/account': typeof ChatAccountRoute
-  '/_chat/': typeof ChatIndexRoute
+  '/_layout': typeof LayoutRouteRouteWithChildren
+  '/_login': typeof LoginRouteRouteWithChildren
+  '/_layout/_chat': typeof LayoutChatRouteRouteWithChildren
+  '/_login/auth': typeof LoginAuthRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
+  '/_layout/_chat/$chatId': typeof LayoutChatChatIdRoute
+  '/_layout/_chat/about': typeof LayoutChatAboutRoute
+  '/_layout/_chat/account': typeof LayoutChatAccountRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/zero/mutate': typeof ApiZeroMutateRoute
+  '/api/zero/query': typeof ApiZeroQueryRoute
+  '/_layout/_chat/': typeof LayoutChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/auth' | '/$chatId' | '/about' | '/account' | '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/api/uploadthing'
+    | '/$chatId'
+    | '/about'
+    | '/account'
+    | '/api/auth/$'
+    | '/api/zero/mutate'
+    | '/api/zero/query'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/$chatId' | '/about' | '/account' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/api/uploadthing'
+    | '/$chatId'
+    | '/about'
+    | '/account'
+    | '/api/auth/$'
+    | '/api/zero/mutate'
+    | '/api/zero/query'
   id:
     | '__root__'
-    | '/_chat'
-    | '/auth'
-    | '/_chat/$chatId'
-    | '/_chat/about'
-    | '/_chat/account'
-    | '/_chat/'
+    | '/_layout'
+    | '/_login'
+    | '/_layout/_chat'
+    | '/_login/auth'
+    | '/api/uploadthing'
+    | '/_layout/_chat/$chatId'
+    | '/_layout/_chat/about'
+    | '/_layout/_chat/account'
+    | '/api/auth/$'
+    | '/api/zero/mutate'
+    | '/api/zero/query'
+    | '/_layout/_chat/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  ChatRoute: typeof ChatRouteWithChildren
-  AuthRoute: typeof AuthRoute
-}
-export interface FileServerRoutesByFullPath {
-  '/api/push': typeof ApiPushServerRoute
-  '/api/uploadthing': typeof ApiUploadthingServerRoute
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRoutesByTo {
-  '/api/push': typeof ApiPushServerRoute
-  '/api/uploadthing': typeof ApiUploadthingServerRoute
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRoutesById {
-  __root__: typeof rootServerRouteImport
-  '/api/push': typeof ApiPushServerRoute
-  '/api/uploadthing': typeof ApiUploadthingServerRoute
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRouteTypes {
-  fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/push' | '/api/uploadthing' | '/api/auth/$'
-  fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/push' | '/api/uploadthing' | '/api/auth/$'
-  id: '__root__' | '/api/push' | '/api/uploadthing' | '/api/auth/$'
-  fileServerRoutesById: FileServerRoutesById
-}
-export interface RootServerRouteChildren {
-  ApiPushServerRoute: typeof ApiPushServerRoute
-  ApiUploadthingServerRoute: typeof ApiUploadthingServerRoute
-  ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
+  LayoutRouteRoute: typeof LayoutRouteRouteWithChildren
+  LoginRouteRoute: typeof LoginRouteRouteWithChildren
+  ApiUploadthingRoute: typeof ApiUploadthingRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiZeroMutateRoute: typeof ApiZeroMutateRoute
+  ApiZeroQueryRoute: typeof ApiZeroQueryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_chat': {
-      id: '/_chat'
+    '/_login': {
+      id: '/_login'
       path: ''
-      fullPath: ''
-      preLoaderRoute: typeof ChatRouteImport
+      fullPath: '/'
+      preLoaderRoute: typeof LoginRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_chat/': {
-      id: '/_chat/'
-      path: '/'
+    '/_layout': {
+      id: '/_layout'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof ChatIndexRouteImport
-      parentRoute: typeof ChatRoute
+      preLoaderRoute: typeof LayoutRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_chat/account': {
-      id: '/_chat/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof ChatAccountRouteImport
-      parentRoute: typeof ChatRoute
-    }
-    '/_chat/about': {
-      id: '/_chat/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof ChatAboutRouteImport
-      parentRoute: typeof ChatRoute
-    }
-    '/_chat/$chatId': {
-      id: '/_chat/$chatId'
-      path: '/$chatId'
-      fullPath: '/$chatId'
-      preLoaderRoute: typeof ChatChatIdRouteImport
-      parentRoute: typeof ChatRoute
-    }
-  }
-}
-declare module '@tanstack/react-start/server' {
-  interface ServerFileRoutesByPath {
     '/api/uploadthing': {
       id: '/api/uploadthing'
       path: '/api/uploadthing'
       fullPath: '/api/uploadthing'
-      preLoaderRoute: typeof ApiUploadthingServerRouteImport
-      parentRoute: typeof rootServerRouteImport
+      preLoaderRoute: typeof ApiUploadthingRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/api/push': {
-      id: '/api/push'
-      path: '/api/push'
-      fullPath: '/api/push'
-      preLoaderRoute: typeof ApiPushServerRouteImport
-      parentRoute: typeof rootServerRouteImport
+    '/_login/auth': {
+      id: '/_login/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof LoginAuthRouteImport
+      parentRoute: typeof LoginRouteRoute
+    }
+    '/_layout/_chat': {
+      id: '/_layout/_chat'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutChatRouteRouteImport
+      parentRoute: typeof LayoutRouteRoute
+    }
+    '/_layout/_chat/': {
+      id: '/_layout/_chat/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutChatIndexRouteImport
+      parentRoute: typeof LayoutChatRouteRoute
+    }
+    '/api/zero/query': {
+      id: '/api/zero/query'
+      path: '/api/zero/query'
+      fullPath: '/api/zero/query'
+      preLoaderRoute: typeof ApiZeroQueryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/zero/mutate': {
+      id: '/api/zero/mutate'
+      path: '/api/zero/mutate'
+      fullPath: '/api/zero/mutate'
+      preLoaderRoute: typeof ApiZeroMutateRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatServerRouteImport
-      parentRoute: typeof rootServerRouteImport
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_layout/_chat/account': {
+      id: '/_layout/_chat/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof LayoutChatAccountRouteImport
+      parentRoute: typeof LayoutChatRouteRoute
+    }
+    '/_layout/_chat/about': {
+      id: '/_layout/_chat/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof LayoutChatAboutRouteImport
+      parentRoute: typeof LayoutChatRouteRoute
+    }
+    '/_layout/_chat/$chatId': {
+      id: '/_layout/_chat/$chatId'
+      path: '/$chatId'
+      fullPath: '/$chatId'
+      preLoaderRoute: typeof LayoutChatChatIdRouteImport
+      parentRoute: typeof LayoutChatRouteRoute
     }
   }
 }
 
-interface ChatRouteChildren {
-  ChatChatIdRoute: typeof ChatChatIdRoute
-  ChatAboutRoute: typeof ChatAboutRoute
-  ChatAccountRoute: typeof ChatAccountRoute
-  ChatIndexRoute: typeof ChatIndexRoute
+interface LayoutChatRouteRouteChildren {
+  LayoutChatChatIdRoute: typeof LayoutChatChatIdRoute
+  LayoutChatAboutRoute: typeof LayoutChatAboutRoute
+  LayoutChatAccountRoute: typeof LayoutChatAccountRoute
+  LayoutChatIndexRoute: typeof LayoutChatIndexRoute
 }
 
-const ChatRouteChildren: ChatRouteChildren = {
-  ChatChatIdRoute: ChatChatIdRoute,
-  ChatAboutRoute: ChatAboutRoute,
-  ChatAccountRoute: ChatAccountRoute,
-  ChatIndexRoute: ChatIndexRoute,
+const LayoutChatRouteRouteChildren: LayoutChatRouteRouteChildren = {
+  LayoutChatChatIdRoute: LayoutChatChatIdRoute,
+  LayoutChatAboutRoute: LayoutChatAboutRoute,
+  LayoutChatAccountRoute: LayoutChatAccountRoute,
+  LayoutChatIndexRoute: LayoutChatIndexRoute,
 }
 
-const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+const LayoutChatRouteRouteWithChildren = LayoutChatRouteRoute._addFileChildren(
+  LayoutChatRouteRouteChildren,
+)
+
+interface LayoutRouteRouteChildren {
+  LayoutChatRouteRoute: typeof LayoutChatRouteRouteWithChildren
+}
+
+const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
+  LayoutChatRouteRoute: LayoutChatRouteRouteWithChildren,
+}
+
+const LayoutRouteRouteWithChildren = LayoutRouteRoute._addFileChildren(
+  LayoutRouteRouteChildren,
+)
+
+interface LoginRouteRouteChildren {
+  LoginAuthRoute: typeof LoginAuthRoute
+}
+
+const LoginRouteRouteChildren: LoginRouteRouteChildren = {
+  LoginAuthRoute: LoginAuthRoute,
+}
+
+const LoginRouteRouteWithChildren = LoginRouteRoute._addFileChildren(
+  LoginRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-  ChatRoute: ChatRouteWithChildren,
-  AuthRoute: AuthRoute,
+  LayoutRouteRoute: LayoutRouteRouteWithChildren,
+  LoginRouteRoute: LoginRouteRouteWithChildren,
+  ApiUploadthingRoute: ApiUploadthingRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiZeroMutateRoute: ApiZeroMutateRoute,
+  ApiZeroQueryRoute: ApiZeroQueryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-const rootServerRouteChildren: RootServerRouteChildren = {
-  ApiPushServerRoute: ApiPushServerRoute,
-  ApiUploadthingServerRoute: ApiUploadthingServerRoute,
-  ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
 }
-export const serverRouteTree = rootServerRouteImport
-  ._addFileChildren(rootServerRouteChildren)
-  ._addFileTypes<FileServerRouteTypes>()

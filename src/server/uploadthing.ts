@@ -1,6 +1,6 @@
 import { createUploadthing, UploadThingError } from 'uploadthing/server';
 import type { FileRouter } from 'uploadthing/server';
-import { auth } from '~/auth.server';
+import { auth } from '~/auth/auth';
 
 const f = createUploadthing();
 

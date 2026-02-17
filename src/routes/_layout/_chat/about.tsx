@@ -1,14 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card';
-import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Button } from '~/components/ui/button';
 import { ExternalLink, Github } from 'lucide-react';
 
-export const Route = createFileRoute('/_chat/about')({
+export const Route = createFileRoute('/_layout/_chat/about')({
   component: RouteComponent,
   ssr: false,
 });

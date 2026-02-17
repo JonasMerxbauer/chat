@@ -23,13 +23,14 @@ import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { DEFAULT_MODEL, getAllModels, MESSAGE_STATUSES } from '~/models';
-import { useSession } from '~/lib/zero-auth';
-import { useZero } from '~/hooks/use-zero';
-import { cn } from '~/lib/utils';
+import { useZero } from '@rocicorp/zero/react';
+import { mutators } from '~/zero/mutators';
+import { cn, createId } from '~/lib/utils';
 import { UploadButton } from './uploadthing';
 
 export const ChatInput = ({
   conversation,
+  user,
   ...props
 }: React.ComponentProps<'textarea'> & {
   conversation?: {
@@ -38,9 +39,12 @@ export const ChatInput = ({
     current_model_provider: string;
     current_model_name: string;
   };
+  user?: {
+    id: string;
+  };
 }) => {
   const params = useParams({
-    from: '/_chat/$chatId',
+    from: '/_layout/_chat/$chatId',
     shouldThrow: false,
   });
   const navigate = useNavigate();
@@ -100,10 +104,8 @@ export const ChatInput = ({
       }
     : localSelectedModel;
 
-  const { data: session } = useSession();
-
-  const userId = session?.user?.id;
-  const isAuthenticated = !!session?.user;
+  const userId = user?.id;
+  const isAuthenticated = !!userId;
 
   const handleSendMessage = async (message: string) => {
     if (!isAuthenticated || !userId) {
@@ -113,51 +115,59 @@ export const ChatInput = ({
     }
 
     if (conversationId) {
-      const messageId = crypto.randomUUID();
+      const messageId = createId();
+      const responseId = createId();
 
-      z.mutate.conversation.createMessage({
-        id: messageId,
-        conversationId: conversationId,
-        content: message,
-        model: currentModel,
-        role: 'user',
-        status: MESSAGE_STATUSES.SENDING,
-        userId,
-        webSearchEnabled,
-        attachments: uploadedFiles
-          .filter((f) => !f.isLoading)
-          .map((f) => ({
-            url: f.url,
-            name: f.name,
-            type: f.type,
-            size: f.size,
-          })),
-      });
+      z.mutate(
+        mutators.conversation.createMessage({
+          id: messageId,
+          conversationId: conversationId,
+          responseId,
+          content: message,
+          model: currentModel,
+          role: 'user',
+          status: MESSAGE_STATUSES.SENDING,
+          userId,
+          webSearchEnabled,
+          attachments: uploadedFiles
+            .filter((f) => !f.isLoading)
+            .map((f) => ({
+              url: f.url,
+              name: f.name,
+              type: f.type,
+              size: f.size,
+            })),
+        }),
+      );
 
       setUploadedFiles([]);
 
       setLastUserMessageId(messageId);
     } else {
-      const conversationId = crypto.randomUUID();
-      const messageId = crypto.randomUUID();
+      const conversationId = createId();
+      const messageId = createId();
+      const responseId = createId();
 
-      z.mutate.conversation.createConversation({
-        id: conversationId,
-        title: 'New chat',
-        messageId,
-        content: message,
-        model: currentModel,
-        userId,
-        webSearchEnabled,
-        attachments: uploadedFiles
-          .filter((f) => !f.isLoading)
-          .map((f) => ({
-            url: f.url,
-            name: f.name,
-            type: f.type,
-            size: f.size,
-          })),
-      });
+      z.mutate(
+        mutators.conversation.createConversation({
+          id: conversationId,
+          title: 'New chat',
+          messageId,
+          responseId,
+          content: message,
+          model: currentModel,
+          userId,
+          webSearchEnabled,
+          attachments: uploadedFiles
+            .filter((f) => !f.isLoading)
+            .map((f) => ({
+              url: f.url,
+              name: f.name,
+              type: f.type,
+              size: f.size,
+            })),
+        }),
+      );
 
       setUploadedFiles([]);
 
@@ -297,10 +307,12 @@ export const ChatInput = ({
 
                     if (conversationId) {
                       // Update existing conversation's model
-                      z.mutate.conversation.updateConversationModel({
-                        id: conversationId,
-                        model,
-                      });
+                      z.mutate(
+                        mutators.conversation.updateConversationModel({
+                          id: conversationId,
+                          model,
+                        }),
+                      );
                     } else {
                       // Update local state for new conversation
                       setLocalSelectedModel(model);
@@ -319,7 +331,7 @@ export const ChatInput = ({
             onUploadBegin={(name) => {
               if (!isAuthenticated) return;
 
-              const fileId = crypto.randomUUID();
+              const fileId = createId();
               setUploadedFiles((prev) => [
                 ...prev,
                 {
