@@ -64,6 +64,7 @@ export const mutators = defineMutators({
           attachments,
         } = args;
         const now = Date.now();
+        const responseCreatedAt = now + 1;
         const effectiveUserId = ctx?.userId ?? userId;
         if (!effectiveUserId) {
           throw new Error('userId is required to create a conversation.');
@@ -101,8 +102,8 @@ export const mutators = defineMutators({
           content: '',
           role: 'assistant',
           status: MESSAGE_STATUSES.PENDING,
-          created_at: now,
-          updated_at: now,
+          created_at: responseCreatedAt,
+          updated_at: responseCreatedAt,
           conversation_id: id,
           user_id: effectiveUserId,
         });
@@ -123,6 +124,7 @@ export const mutators = defineMutators({
           attachments,
         } = args;
         const now = Date.now();
+        const responseCreatedAt = now + 1;
         const effectiveUserId = ctx?.userId ?? userId;
         if (!effectiveUserId) {
           throw new Error('userId is required to create a message.');
@@ -149,8 +151,8 @@ export const mutators = defineMutators({
           content: '',
           role: 'assistant',
           status: MESSAGE_STATUSES.PENDING,
-          created_at: now,
-          updated_at: now,
+          created_at: responseCreatedAt,
+          updated_at: responseCreatedAt,
           conversation_id: conversationId,
           user_id: effectiveUserId,
         });
