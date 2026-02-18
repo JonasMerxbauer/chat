@@ -2,6 +2,10 @@
 
 A modern chat application built for the [T3 Chat Cloneathon](https://cloneathon.t3.chat/) competition.
 
+## Deployment
+
+The app is available at [ZeroChat](https://zerochat.dev/)
+
 ## Tech Stack
 
 - [Tanstack Start](https://tanstack.com/start) - Full-stack React framework
@@ -20,11 +24,11 @@ pnpm install
 # Setup PostgreSQL database
 
 # Initialize Zero
-pnpm zero
+pnpm dev:zero
 
 # Update database tables based on schema
 # Run Zero again to sync schema
-pnpm zero
+pnpm dev:zero
 
 # Start development server
 pnpm dev
