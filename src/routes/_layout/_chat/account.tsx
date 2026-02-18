@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { useSession, deleteUser } from '~/auth';
-import { clearZeroData } from '~/lib/zero-auth';
+import { authClient, clearZeroCache } from '~/auth/client';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import {
@@ -21,16 +20,10 @@ export const Route = createFileRoute('/_layout/_chat/account')({
 });
 
 function RouteComponent() {
-  const { data: session } = useSession();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!session?.user) {
-    navigate({ to: '/auth' });
-    return null;
-  }
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -38,13 +31,13 @@ function RouteComponent() {
 
     try {
       // Delete the user account using Better Auth
-      const result = await deleteUser();
+      const result = await authClient.deleteUser();
 
       if (result.error) {
         setError(result.error.message || 'Failed to delete account');
         return;
       }
-      await clearZeroData();
+      await clearZeroCache();
 
       navigate({ to: '/' });
     } catch (err) {
