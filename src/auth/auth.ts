@@ -1,6 +1,8 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { eq } from 'drizzle-orm';
 import { db } from '~/db';
+import { conversation, message } from '~/db/schema';
 import * as schema from './schema';
 import { env } from '~/env';
 
@@ -27,7 +29,10 @@ export const auth = betterAuth({
   user: {
     deleteUser: {
       enabled: true,
-      beforeDelete: async (user) => {},
+      beforeDelete: async (user) => {
+        await db.delete(message).where(eq(message.user_id, user.id));
+        await db.delete(conversation).where(eq(conversation.user_id, user.id));
+      },
       afterDelete: async (user) => {
         console.log(`User ${user.email} successfully deleted`);
       },
