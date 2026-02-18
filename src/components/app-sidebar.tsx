@@ -34,11 +34,15 @@ export function AppSidebar({
   conversations,
   selectedConversation,
   user,
+  queryClient,
+  router,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   conversations: any[];
   selectedConversation: string;
   user: any;
+  queryClient: any;
+  router: any;
 }) {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
@@ -49,6 +53,10 @@ export function AppSidebar({
     try {
       await logout();
 
+      // Invalidate the session cache
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'getSession'] });
+      // Force router to re-validate all route loaders
+      await router.invalidate();
       // Navigate to home
       navigate({ to: '/' });
     } catch (error) {

@@ -4,6 +4,7 @@ import {
   Outlet,
   redirect,
   useParams,
+  useRouter,
 } from '@tanstack/react-router';
 import { AppSidebar } from '~/components/app-sidebar';
 import {
@@ -36,7 +37,8 @@ export const Route = createFileRoute('/_layout/_chat')({
 
 function RouteComponent() {
   // Get user and subscription from route context (set in beforeLoad) - avoids extra API call
-  const { user } = Route.useRouteContext();
+  const { user, queryClient } = Route.useRouteContext();
+  const router = useRouter();
 
   const params = useParams({
     from: '/_layout/_chat/$chatId',
@@ -55,6 +57,8 @@ function RouteComponent() {
         conversations={conversations}
         selectedConversation={params?.chatId ?? ''}
         user={user}
+        queryClient={queryClient}
+        router={router}
       />
       <SidebarInset>
         <div className="absolute top-5 right-2 z-[100] md:hidden">
