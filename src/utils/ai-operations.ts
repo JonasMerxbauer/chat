@@ -68,8 +68,7 @@ export async function streamAIResponse(
         await db
           .update(message)
           .set({
-            content:
-              'Sorry, I encountered an error while generating the response.',
+            content: formatProviderError(error, model),
             status: MESSAGE_STATUSES.ERROR,
             updated_at: Date.now(),
           })
@@ -137,7 +136,7 @@ async function handleTextGeneration(
       for (const msg of conversationMessages) {
         if (msg.role === 'user' || msg.role === 'assistant') {
           const messageContent: any = {
-            role: msg.role as 'user' | 'assistant',
+            role: msg.role,
           };
 
           // Handle attachments for user messages
@@ -239,6 +238,10 @@ async function handleTextGeneration(
     }
   }
 
+  if (!fullResponse.trim()) {
+    throw new Error(`${getProviderName(model)} returned an empty response.`);
+  }
+
   await db
     .update(message)
     .set({
@@ -271,8 +274,43 @@ const getProvider = (model: any, webSearchEnabled = false) => {
   } else if (model.provider === 'GOOGLE') {
     return { model: google(model.id) };
   } else if (model.provider === 'ANTHROPIC') {
-    return { model: anthropic(model.id) };
+    return { model: anthropic(getAnthropicModelId(model.id)) };
   }
 
   return { model: google(DEFAULT_MODEL.id) };
+};
+
+const getAnthropicModelId = (modelId: string) => {
+  if (modelId === 'claude-sonnet-4.5') {
+    return 'claude-sonnet-4-5-20250929';
+  }
+
+  return modelId;
+};
+
+const getProviderName = (model: any) => {
+  if (model?.provider === 'ANTHROPIC') return 'Anthropic';
+  if (model?.provider === 'OPENAI') return 'OpenAI';
+  if (model?.provider === 'GOOGLE') return 'Google';
+
+  return 'AI provider';
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error === 'string' && error.trim()) {
+    return error;
+  }
+
+  return 'Unknown provider error';
+};
+
+const formatProviderError = (error: unknown, model: any) => {
+  const provider = getProviderName(model);
+  const modelId = model?.id ? ` (${model.id})` : '';
+
+  return `${provider}${modelId} error: ${getErrorMessage(error)}`;
 };

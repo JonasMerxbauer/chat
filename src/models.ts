@@ -5,7 +5,7 @@ export const MODELS = {
     provider: 'OPENAI',
   },
   CLAUDE_SONNET_4_5: {
-    id: 'claude-sonnet-4.5',
+    id: 'claude-sonnet-4-5-20250929',
     name: 'Claude Sonnet 4.5',
     provider: 'ANTHROPIC',
   },

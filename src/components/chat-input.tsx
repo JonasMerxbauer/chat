@@ -469,7 +469,7 @@ export const Message = ({ message }: { message: any }) => {
       case MESSAGE_STATUSES.REASONING:
         return 'Reasoning...';
       case MESSAGE_STATUSES.ERROR:
-        return 'Error occurred';
+        return content && content.trim() ? null : 'Error occurred';
       default:
         return null;
     }
@@ -510,6 +510,7 @@ export const Message = ({ message }: { message: any }) => {
         {/* Status indicator for AI messages */}
         {role === 'assistant' &&
           (status === MESSAGE_STATUSES.PENDING ||
+            status === MESSAGE_STATUSES.ERROR ||
             status === MESSAGE_STATUSES.REASONING ||
             status === MESSAGE_STATUSES.STREAMING) && (
             <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
