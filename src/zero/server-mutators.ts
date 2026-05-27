@@ -1,8 +1,10 @@
 import { defineMutator, defineMutators } from '@rocicorp/zero';
+import type {
+  ConversationCreateArgs,
+  MessageCreateArgs,
+} from '~/zero/mutators';
 import {
   mutators as baseMutators,
-  type ConversationCreateArgs,
-  type MessageCreateArgs,
 } from '~/zero/mutators';
 import {
   generateConversationTitle,
@@ -26,7 +28,7 @@ export const serverMutators = defineMutators(baseMutators, {
       }
 
       try {
-        await generateConversationTitle(id, content);
+        await generateConversationTitle(id, content, model);
       } catch (error) {
         console.error('Failed to generate title:', error);
       }
