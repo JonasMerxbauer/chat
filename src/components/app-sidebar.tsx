@@ -1,8 +1,11 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { logout } from '~/auth/client';
 import { BadgeCheck, ChevronsUpDown, Info, LogOut, X } from 'lucide-react';
-
 import * as React from 'react';
+import { useZero } from '@rocicorp/zero/react';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { logout } from '~/auth/client';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,10 +28,7 @@ import {
   useSidebar,
 } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
-import { Button } from './ui/button';
-import { useZero } from '@rocicorp/zero/react';
 import { mutators } from '~/zero/mutators';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function AppSidebar({
   conversations,
@@ -38,7 +38,7 @@ export function AppSidebar({
   router,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
-  conversations: any[];
+  conversations: Array<any>;
   selectedConversation: string;
   user: any;
   queryClient: any;
@@ -72,9 +72,15 @@ export function AppSidebar({
     e.stopPropagation();
 
     try {
-      z.mutate(
+      const result = z.mutate(
         mutators.conversation.deleteConversation({ id: conversationId }),
       );
+
+      const localResult = await result.client;
+      if (localResult.type === 'error') {
+        console.error('Error deleting conversation:', localResult.error.message);
+        return;
+      }
 
       if (selectedConversation === conversationId) {
         navigate({ to: '/' });

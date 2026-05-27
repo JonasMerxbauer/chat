@@ -1,5 +1,6 @@
 import { defineMutator, defineMutators } from '@rocicorp/zero';
 import { MESSAGE_STATUSES } from '~/models';
+import { zql } from '~/zero/schema';
 
 type Attachment = {
   url: string;
@@ -17,7 +18,7 @@ export type ConversationCreateArgs = {
   model: any;
   userId?: string;
   webSearchEnabled?: boolean;
-  attachments?: Attachment[];
+  attachments?: Array<Attachment>;
 };
 
 export type MessageCreateArgs = {
@@ -30,7 +31,7 @@ export type MessageCreateArgs = {
   model: any;
   userId?: string;
   webSearchEnabled?: boolean;
-  attachments?: Attachment[];
+  attachments?: Array<Attachment>;
 };
 
 type MessageUpdateArgs = {
@@ -166,16 +167,8 @@ export const mutators = defineMutators({
     }),
 
     deleteConversation: defineMutator<{ id: string }>(async ({ tx, args }) => {
-      const query = (tx as { query?: any }).query;
-      if (!query) {
-        throw new Error(
-          'Query interface is unavailable for deleteConversation.',
-        );
-      }
-      const messages = await query.message.where(
-        'conversation_id',
-        '=',
-        args.id,
+      const messages = await tx.run(
+        zql.message.where('conversation_id', '=', args.id),
       );
 
       for (const message of messages) {
