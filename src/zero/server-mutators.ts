@@ -27,11 +27,13 @@ export const serverMutators = defineMutators(baseMutators, {
         return;
       }
 
-      try {
-        await generateConversationTitle(id, content, model);
-      } catch (error) {
-        console.error('Failed to generate title:', error);
-      }
+      setTimeout(async () => {
+        try {
+          await generateConversationTitle(id, content, model);
+        } catch (error) {
+          console.error('Failed to generate title:', error);
+        }
+      }, 100);
 
       try {
         await streamAIResponse(responseId, model, webSearchEnabled, id);
